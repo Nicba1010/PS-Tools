@@ -2,6 +2,7 @@ import binascii
 import concurrent
 import re
 from concurrent.futures.thread import ThreadPoolExecutor
+from typing import List, Pattern, Callable, Set
 
 import requests
 import sqlalchemy
@@ -11,12 +12,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.ddl import CreateTable
-from models import Product,Language,Title,TitleName,TitleUpdateInfoUrl,Update,UpdatePackage
+
+from models import Product, Language, Title, TitleName, TitleUpdateInfoUrl, Update, UpdatePackage
 
 Base = declarative_base()
 engine = create_engine('sqlite:///:memory:')
 Session = sessionmaker(bind=engine)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+ps3_regex: Pattern = re.compile("(?:(?:[BPVX][CL][AEHJKPU][BCDMSTVXZ])|(?:NP[AEHJKUIX][A-Z])|(?:MRTC))\d{5}")
 
 
 def get_soup_for_code(code):
@@ -136,7 +139,6 @@ def psn_updates():
                 update = future.result()
             except Exception as e:
                 raise e
-                print('%r generated an exception: %s' % (id_, e))
             else:
                 if update is None:
                     continue
@@ -146,7 +148,7 @@ def psn_updates():
                     total += int(u['packages'][0]['size'])
                 print(total)
 
-                #t = session.query(Title).filter(Title.id == update['id']).one_or_none()
+                # t = session.query(Title).filter(Title.id == update['id']).one_or_none()
                 t = None
                 if t is None:
                     print("Title doesn't exist yet")
@@ -179,8 +181,34 @@ def game_tdb():
             ))
 
 
+class PSNDLEntry(object):
+    is_ps3: Callable[['PSNDLEntry'], bool] = lambda x: ps3_regex.match(x.title_id)
+
+    def __init__(self, db_line: str):
+        data: List[str] = db_line.split(';')
+        self.title_id: str = data[0]
+        self.name: str = data[1]
+        self.type: str = data[2]
+        self.region: str = data[3]
+        self.url: str = data[4]
+        self.rap_file_name: str = data[5]
+        self.rap_data: str = data[6]
+        self.description: str = data[7]
+        self.uploader: str = data[8]
+
+
+def psndl():
+    data: str = requests.post("https://psndl.net/download-db").content.decode('utf-8')
+    entries: List[PSNDLEntry] = list(filter(PSNDLEntry.is_ps3, map(lambda x: PSNDLEntry(x), data.splitlines())))
+    types: Set[str] = set(map(lambda x: x.type, entries))
+    regions: Set[str] = set(map(lambda x: x.region, entries))
+    print('Count: {}'.format(len(entries)))
+    print('All Types: {}'.format(types))
+    print('All Regions: {}'.format(regions))
+
+
 if __name__ == '__main__':
-    psn_updates()
+    psndl()
 
 # titlepatch -> NPHB00010
 # TITLE_01 -> NPHB00010

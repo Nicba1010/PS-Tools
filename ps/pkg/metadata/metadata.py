@@ -4,9 +4,9 @@ from typing import IO, List
 
 from clint.textui import puts
 
-from psn.pkg.content_type import ContentType
-from psn.pkg.drm_type import DrmType
-from psn.pkg.errors import InvalidPkgError
+from ps.pkg.content_type import ContentType
+from ps.pkg.drm_type import DrmType
+from ps.pkg.errors import InvalidPKGException, InvalidPKGMetadataSizeException, InvalidPKGMetadataException
 
 
 class PkgMetadata(object):
@@ -19,23 +19,16 @@ class PkgMetadata(object):
         self.id = struct.unpack('>I', f.read(4))[0]
         self.data_size = struct.unpack('>I', f.read(4))[0]
         self.data = f.read(self.data_size)
-
-        try:
-            if len(self.possible_sizes) != 0 and self.data_size not in self.__class__.possible_sizes:
-                puts("Invalid Metadata Data Size!")
-                raise Exception
-
-            if len(self.possible_values) != 0 and self.data not in self.__class__.possible_values:
-                puts("Invalid Metadata Data!")
-                raise Exception
-        except Exception as e:
-            puts("Invalid Metadata Object!")
-            raise InvalidPkgError
-
         puts("Type: {}".format(self.category_name))
         puts("Identifier: {}".format(self.id))
         puts("Data Size: {}".format(self.data_size))
         puts("Data: {}".format(hexlify(self.data)))
+
+        if len(self.possible_sizes) != 0 and self.data_size not in self.__class__.possible_sizes:
+            raise InvalidPKGMetadataSizeException(self.data_size, self.possible_sizes)
+
+        if len(self.possible_values) != 0 and self.data not in self.__class__.possible_values:
+            raise InvalidPKGMetadataException(self.data, self.possible_values)
 
     @staticmethod
     def create(f: IO) -> 'PkgMetadata':
@@ -44,7 +37,7 @@ class PkgMetadata(object):
         for subclass in PkgMetadata.__subclasses__():
             if subclass.id == id:
                 return subclass(f)
-        raise InvalidPkgError
+        raise InvalidPKGException
 
 
 class DrmTypeMetadata(PkgMetadata):
@@ -177,7 +170,13 @@ class UnknownMetadata(PkgMetadata):
     possible_sizes = [0x08]
     possible_values = [
         bytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
-        bytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0x00, 0x00])
+        bytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0x00, 0x00]),
+        bytes([0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00]),
+        bytes([0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00]),
+        bytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00]),
+        bytes([0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00]),
+        bytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00]),
+        bytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00])
     ]
 
     def __init__(self, f: IO):
