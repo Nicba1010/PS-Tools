@@ -7,6 +7,7 @@ from clint.textui import puts
 from ps.pkg.content_type import ContentType
 from ps.pkg.drm_type import DrmType
 from ps.pkg.errors import InvalidPKGException, InvalidPKGMetadataSizeException, InvalidPKGMetadataException
+from ps.utils import read_u32
 
 
 class PkgMetadata(object):
@@ -16,8 +17,8 @@ class PkgMetadata(object):
     possible_values: List[bytes] = NotImplementedError
 
     def __init__(self, f: IO):
-        self.id = struct.unpack('>I', f.read(4))[0]
-        self.data_size = struct.unpack('>I', f.read(4))[0]
+        self.id = read_u32(f)
+        self.data_size = read_u32(f)
         self.data = f.read(self.data_size)
         puts("Type: {}".format(self.category_name))
         puts("Identifier: {}".format(self.id))
@@ -32,7 +33,7 @@ class PkgMetadata(object):
 
     @staticmethod
     def create(f: IO) -> 'PkgMetadata':
-        metadata_id: int = struct.unpack('>I', f.read(4))[0]
+        metadata_id: int = read_u32(f)
         f.seek(f.tell() - 4)
         for subclass in PkgMetadata.__subclasses__():
             if subclass.id == metadata_id:

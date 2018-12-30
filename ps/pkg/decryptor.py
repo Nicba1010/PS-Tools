@@ -1,17 +1,16 @@
-from io import IOBase
 from typing import IO, AnyStr, List
 
 from .header import PkgHeader
-from ..utils import unpack128, xor_lib
+from ..utils import xor_lib
 
 
-class DecryptorIO(IOBase):
+# noinspection PyAbstractClass
+class DecryptorIO(IO):
     SEEK_DATA_OFFSET: int = 4
 
     def __init__(self, header: PkgHeader, f: IO):
         self.encryptor = header.encryptor
         self.header: PkgHeader = header
-        self.pkg_data_riv: int = unpack128(header.pkg_data_riv)
         self.f: IO = f
 
     def __enter__(self) -> 'DecryptorIO':

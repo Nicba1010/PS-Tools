@@ -4,6 +4,7 @@ from typing import IO
 from aenum import Enum
 from clint.textui import puts
 
+from ps.utils import read_u32
 from .errors import InvalidPSARCError
 
 magic: bytes = b'PSAR'
@@ -30,18 +31,18 @@ class PSARCHeader(object):
         else:
             puts("Magic Verified")
 
-        self.version_major: int = struct.unpack('>H', f.read(2))[0]
-        self.version_minor: int = struct.unpack('>H', f.read(2))[0]
+        self.version_major: int = read_u16(f)
+        self.version_minor: int = read_u16(f)
         puts("Version: v{}.{}".format(self.version_major, self.version_minor))
 
         self.compression_type: CompressionType = CompressionType(f.read(4))
         puts("Compression Type: {}".format(self.compression_type))
 
-        self.toc_length: int = struct.unpack('>I', f.read(4))[0]
-        self.toc_entry_size: int = struct.unpack('>I', f.read(4))[0]
-        self.toc_entries: int = struct.unpack('>I', f.read(4))[0]
-        self.block_size: int = struct.unpack('>I', f.read(4))[0]
-        self.archive_path_type: ArchivePathType = ArchivePathType(struct.unpack('>I', f.read(4))[0])
+        self.toc_length: int = read_u32(f)
+        self.toc_entry_size: int = read_u32(f)
+        self.toc_entries: int = read_u32(f)
+        self.block_size: int = read_u32(f)
+        self.archive_path_type: ArchivePathType = ArchivePathType(read_u32(f))
         puts("TOC Length: {}".format(self.toc_length))
         puts("TOC Entry Size: {}".format(self.toc_entry_size))
         puts("TOC Entries: {}".format(self.toc_entries))

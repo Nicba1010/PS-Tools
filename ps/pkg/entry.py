@@ -4,7 +4,7 @@ from typing import IO
 
 from clint.textui import puts
 
-from ps.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE
+from ps.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, read_u32, read_u64
 from .decryptor import DecryptorIO
 
 
@@ -12,12 +12,12 @@ class PkgEntry(object):
 
     def __init__(self, f: 'DecryptorIO'):
         self.f: IO = f
-        self.name_offset: int = struct.unpack('>I', f.read(4))[0]
-        self.name_size: int = struct.unpack('>I', f.read(4))[0]
-        self.file_offset: int = struct.unpack('>Q', f.read(8))[0]
-        self.file_size: int = struct.unpack('>Q', f.read(8))[0]
-        self.type: int = struct.unpack('>I', f.read(4))[0]
-        self.pad: int = struct.unpack('>I', f.read(4))[0]
+        self.name_offset: int = read_u32(f)
+        self.name_size: int = read_u32(f)
+        self.file_offset: int = read_u64(f)
+        self.file_size: int = read_u64(f)
+        self.type: int = read_u32(f)
+        self.pad: int = read_u32(f)
         puts("Name Offset: {}".format(self.name_offset))
         puts("Name Size: {}".format(self.name_size))
         puts("File Offset: {}".format(self.file_offset))

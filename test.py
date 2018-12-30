@@ -15,8 +15,6 @@ if __name__ == '__main__':
     skip = False
     for root, dirs, files in os.walk("H:\PSN"):
         for file in files:
-            if 'NPJB00598' in file:
-                skip = False
             if file.endswith(".pkg") and not skip:
                 file = os.path.join(root, file)
                 print(file)

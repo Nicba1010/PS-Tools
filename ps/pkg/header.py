@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.ciphers import algorithms, Cipher, modes
 from .errors import InvalidPKGException
 from .revision import PkgRevision
 from .type import PkgType
-from ..utils import ps3_aes_key, psp_aes_key
+from ..utils import ps3_aes_key, psp_aes_key, read_u32, read_u64
 
 backend = default_backend()
 magic: bytes = b'\x7fPKG'
@@ -36,19 +36,19 @@ class PkgHeader(object):
         self.encryptor = self.cipher.encryptor()
         puts("Encryptor initialized...")
 
-        self.metadata_offset: int = struct.unpack('>I', f.read(4))[0]
-        self.metadata_count: int = struct.unpack('>I', f.read(4))[0]
-        self.metadata_size: int = struct.unpack('>I', f.read(4))[0]
+        self.metadata_offset: int = read_u32(f)
+        self.metadata_count: int = read_u32(f)
+        self.metadata_size: int = read_u32(f)
         puts("Metadata Offset: {}".format(self.metadata_offset))
         puts("Metadata Count: {}".format(self.metadata_count))
         puts("Metadata Size: {}".format(self.metadata_size))
 
-        self.item_count: int = struct.unpack('>I', f.read(4))[0]
+        self.item_count: int = read_u32(f)
         puts("Item Count: {}".format(self.item_count))
 
-        self.total_size: int = struct.unpack('>Q', f.read(8))[0]
-        self.data_offset: int = struct.unpack('>Q', f.read(8))[0]
-        self.data_size: int = struct.unpack('>Q', f.read(8))[0]
+        self.total_size: int = read_u64(f)
+        self.data_offset: int = read_u64(f)
+        self.data_size: int = read_u64(f)
         puts("Total Size: {}".format(self.total_size))
         puts("Data Offset: {}".format(self.data_offset))
         puts("Data Size: {}".format(self.data_size))
