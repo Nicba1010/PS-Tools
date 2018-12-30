@@ -34,7 +34,7 @@ class PkgHeader(object):
             ps3_aes_key if self.type == PkgType.PS3 else psp_aes_key
         ), modes.ECB(), backend=backend)
         self.encryptor = self.cipher.encryptor()
-        puts("Encrypter initialized...")
+        puts("Encryptor initialized...")
 
         self.metadata_offset: int = struct.unpack('>I', f.read(4))[0]
         self.metadata_count: int = struct.unpack('>I', f.read(4))[0]

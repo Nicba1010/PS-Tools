@@ -11,7 +11,7 @@ magic: bytes = b'PSAR'
 
 class CompressionType(Enum):
     ZLIB = b'zlib'
-    LZMA = b'lzmax'
+    LZMA = b'lzma'
 
 
 class ArchivePathType(Enum):

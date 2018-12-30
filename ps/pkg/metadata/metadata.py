@@ -32,10 +32,10 @@ class PkgMetadata(object):
 
     @staticmethod
     def create(f: IO) -> 'PkgMetadata':
-        id: int = struct.unpack('>I', f.read(4))[0]
+        metadata_id: int = struct.unpack('>I', f.read(4))[0]
         f.seek(f.tell() - 4)
         for subclass in PkgMetadata.__subclasses__():
-            if subclass.id == id:
+            if subclass.id == metadata_id:
                 return subclass(f)
         raise InvalidPKGException
 

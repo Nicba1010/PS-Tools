@@ -44,8 +44,9 @@ class PkgEntry(object):
         elif os.path.isfile(path):
             pass
 
-        directory = os.path.dirname(path)
-        file_name = os.path.basename(path)
+        directory: str = os.path.dirname(path)
+        # TODO: Do we really need this? Maybe for logging?
+        # file_name: str = os.path.basename(path)
 
         if create_directories and not os.path.exists(directory):
             os.makedirs(directory)
