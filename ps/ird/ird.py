@@ -103,6 +103,11 @@ class IRD(object):
         logger.info(f"File successfully parsed")
 
     def get_file_handle(self) -> IO:
+        """
+        Returns a file handle depending on if the IRD file
+        is gzip compressed, or already extracted.
+        :return: file handle
+        """
         if self.magic == compressed_magic:
             return gzip.open(self.path, 'rb')
         elif self.magic == uncompressed_magic:
