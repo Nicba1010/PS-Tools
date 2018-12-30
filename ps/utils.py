@@ -29,6 +29,10 @@ xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 
 
+def read_u8(f: IO, endianess: str = '>') -> int:
+    return struct.unpack(endianess + 'B', f.read(1))[0]
+
+
 def read_u16(f: IO, endianess: str = '>') -> int:
     return struct.unpack(endianess + 'H', f.read(2))[0]
 

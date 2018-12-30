@@ -1,4 +1,3 @@
-import struct
 from binascii import hexlify
 from typing import IO
 
