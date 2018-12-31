@@ -1,7 +1,10 @@
+import logging
 import os
 import unittest
 
 from ps.ird import IRD
+
+logging.basicConfig(level=logging.DEBUG, format='%(name)-12s: %(levelname)-8s %(message)s')
 
 
 class IrdParsingTest(unittest.TestCase):

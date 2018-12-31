@@ -5,8 +5,8 @@ import zlib
 from binascii import hexlify
 from typing import IO, List, Dict
 
-from ps.utils import read_u8, read_u32
-from .constants import compressed_magic, uncompressed_magic
+from ps.utils import read_u8, read_u32, unpack_u32
+from .constants import compressed_magic, uncompressed_magic, data2_patch_decryptor, data2_patch_encryptor
 from .errors import EmptyIRDException, InvalidIRDMagicException, InvalidIRDCRCException
 from .header import IRDHeader
 
@@ -14,7 +14,6 @@ logger = logging.getLogger('IRD')
 
 
 class IRD(object):
-
     def __init__(self, path: str, verify=True):
         #: IRD File Path
         self.path: str = path
@@ -36,17 +35,21 @@ class IRD(object):
                 self.id: str = read_u32(f)
                 logger.debug(f"ID (v7 only): {self.id}")
 
-            #: TODO: Document this!
+            #: ISO9660 Header Size
             self.iso_header_size: int = read_u32(f, endianess='<')
-            #: TODO: Document this!
-            self.iso_header: IO = gzip.GzipFile(fileobj=f.read(self.iso_header_size))
             logger.debug(f"Header Size: {self.iso_header_size}")
 
-            #: TODO: Document this!
+            # TODO: Write ISO9660 Header Parser
+            #: ISO9660 Header
+            self.iso_header: IO = gzip.GzipFile(fileobj=f.read(self.iso_header_size))
+
+            #: ISO9660 Footer Size
             self.iso_footer_size: int = read_u32(f, endianess='<')
-            #: TODO: Document this!
-            self.iso_footer: IO = gzip.GzipFile(fileobj=f.read(self.iso_footer_size))
             logger.debug(f"Footer Size: {self.iso_footer_size}")
+
+            # TODO: Write ISO9660 Footer Parser
+            #: ISO9660 Footer
+            self.iso_footer: IO = gzip.GzipFile(fileobj=f.read(self.iso_footer_size))
 
             #: TODO: Document this!
             self.region_count: int = read_u8(f)
@@ -80,11 +83,17 @@ class IRD(object):
                 logger.debug(f"PIC: {hexlify(self.pic).decode('ASCII')}")
 
             #: Used to derive the disc AES encryption key
-            self.data_1: bytes = f.read(16)
+            self.data1: bytes = f.read(16)
             #: TODO: Document this!
-            self.data_2: bytes = f.read(16)
-            logger.debug(f"Data1: {hexlify(self.data_1).decode('ASCII')}")
-            logger.debug(f"Data2: {hexlify(self.data_2).decode('ASCII')}")
+            self.data2: bytes = f.read(16)
+            #: Data2 Decrypted
+            self.data2_decrypted: bytes = IRD.decrypt_data2(self.data2)
+            #: Data2 Patched
+            self.data2_patched: bytes = IRD.patch_data2(self.data2)
+            logger.info(f"Data1: {hexlify(self.data1).decode('ASCII')}")
+            logger.info(f"Data2: {hexlify(self.data2).decode('ASCII')}")
+            logger.info(f"Data2(decrypted): {hexlify(self.data2_decrypted).decode('ASCII')}")
+            logger.info(f"Data2(patched): {hexlify(self.data2_patched).decode('ASCII')}")
 
             if self.version < 9:
                 #: See http://www.t10.org/ftp/t10/document.04/04-328r0.pdf#page=43
@@ -138,3 +147,32 @@ class IRD(object):
         :return: ird file format version
         """
         return self.header.version
+
+    @staticmethod
+    def decrypt_data2(data2: bytes) -> bytes:
+        """
+        Decrypts data2 using the data2_key and data2_iv
+        with AES in CBC mode (constants.py).
+        :param data2: data2
+        :return: decrypted data2
+        """
+        return data2_patch_decryptor.update(data2)
+
+    @staticmethod
+    def patch_data2(data2: bytes) -> bytes:
+        """
+        Patches data2.
+        Steps:
+         - Decrypt data2
+         - Swap last 4 bytes
+         - Encrypt with same keys used for decrypting data2
+        :param data2: data2
+        :return: patched data2
+        """
+        data2_decrypted: bytes = IRD.decrypt_data2(data2)
+        if unpack_u32(data2_decrypted[12:16]) == 1:
+            data2_decrypted_patch: bytes = data2_decrypted[0:12] + bytes([0x01, 0x00, 0x00, 0x00])
+            data2_decrypted_patch = data2_patch_encryptor.update(data2_decrypted_patch)
+            return data2_decrypted_patch
+        else:
+            return data2

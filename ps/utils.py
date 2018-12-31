@@ -29,17 +29,33 @@ xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 
 
+def unpack_u8(data: bytes, endianess: str = '>'):
+    return struct.unpack(endianess + 'B', data)[0]
+
+
 def read_u8(f: IO, endianess: str = '>') -> int:
-    return struct.unpack(endianess + 'B', f.read(1))[0]
+    return unpack_u8(f.read(1), endianess=endianess)
+
+
+def unpack_u16(data: bytes, endianess: str = '>'):
+    return struct.unpack(endianess + 'H', data)[0]
 
 
 def read_u16(f: IO, endianess: str = '>') -> int:
-    return struct.unpack(endianess + 'H', f.read(2))[0]
+    return unpack_u16(f.read(2), endianess=endianess)
+
+
+def unpack_u32(data: bytes, endianess: str = '>'):
+    return struct.unpack(endianess + 'I', data)[0]
 
 
 def read_u32(f: IO, endianess: str = '>') -> int:
-    return struct.unpack(endianess + 'I', f.read(4))[0]
+    return unpack_u32(f.read(4), endianess=endianess)
+
+
+def unpack_u64(data: bytes, endianess: str = '>'):
+    return struct.unpack(endianess + 'Q', data)[0]
 
 
 def read_u64(f: IO, endianess: str = '>') -> int:
-    return struct.unpack(endianess + 'Q', f.read(8))[0]
+    return unpack_u64(f.read(8), endianess=endianess)
