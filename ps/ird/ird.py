@@ -41,7 +41,7 @@ class IRD(object):
 
             # TODO: Write ISO9660 Header Parser
             #: ISO9660 Header
-            self.iso_header: IO = gzip.GzipFile(fileobj=f.read(self.iso_header_size))
+            self.iso_header: bytes = zlib.decompress(f.read(self.iso_header_size), 15 + 16)
 
             #: ISO9660 Footer Size
             self.iso_footer_size: int = read_u32(f, endianess='<')

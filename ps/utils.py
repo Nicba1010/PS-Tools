@@ -2,7 +2,6 @@ import ctypes
 import os
 import struct
 import subprocess
-
 from ctypes import cdll
 from typing import IO
 
@@ -29,33 +28,70 @@ xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 
 
-def unpack_u8(data: bytes, endianess: str = '>'):
+class Endianess(object):
+    LITTLE_ENDIAN: str = '<'
+    BIG_ENDIAN: str = '>'
+
+
+def unpack_u8(data: bytes, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
     return struct.unpack(endianess + 'B', data)[0]
 
 
-def read_u8(f: IO, endianess: str = '>') -> int:
+def read_u8(f: IO, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
     return unpack_u8(f.read(1), endianess=endianess)
 
 
-def unpack_u16(data: bytes, endianess: str = '>'):
+def unpack_u16(data: bytes, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
     return struct.unpack(endianess + 'H', data)[0]
 
 
-def read_u16(f: IO, endianess: str = '>') -> int:
+def read_u16(f: IO, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
     return unpack_u16(f.read(2), endianess=endianess)
 
 
-def unpack_u32(data: bytes, endianess: str = '>'):
+def unpack_u32(data: bytes, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
     return struct.unpack(endianess + 'I', data)[0]
 
 
-def read_u32(f: IO, endianess: str = '>') -> int:
+def read_u32(f: IO, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
     return unpack_u32(f.read(4), endianess=endianess)
 
 
-def unpack_u64(data: bytes, endianess: str = '>'):
+def unpack_u64(data: bytes, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
     return struct.unpack(endianess + 'Q', data)[0]
 
 
-def read_u64(f: IO, endianess: str = '>') -> int:
+def read_u64(f: IO, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
     return unpack_u64(f.read(8), endianess=endianess)
+
+
+def unpack_i8(data: bytes, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
+    return struct.unpack(endianess + 'b', data)[0]
+
+
+def read_i8(f: IO, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
+    return unpack_i8(f.read(1), endianess=endianess)
+
+
+def unpack_i16(data: bytes, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
+    return struct.unpack(endianess + 'h', data)[0]
+
+
+def read_i16(f: IO, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
+    return unpack_i16(f.read(2), endianess=endianess)
+
+
+def unpack_i32(data: bytes, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
+    return struct.unpack(endianess + 'i', data)[0]
+
+
+def read_i32(f: IO, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
+    return unpack_i32(f.read(4), endianess=endianess)
+
+
+def unpack_i64(data: bytes, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
+    return struct.unpack(endianess + 'q', data)[0]
+
+
+def read_i64(f: IO, endianess: str = Endianess.LITTLE_ENDIAN) -> int:
+    return unpack_i64(f.read(8), endianess=endianess)
