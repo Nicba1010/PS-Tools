@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives.ciphers import algorithms, Cipher, modes
 from .errors import InvalidPKGException
 from .revision import PkgRevision
 from .type import PkgType
-from ..utils import ps3_aes_key, psp_aes_key, read_u32, read_u64
+from ..utils import ps3_aes_key, psp_aes_key, read_u32, read_u64, Endianess
 
 backend = default_backend()
 magic: bytes = b'\x7fPKG'
@@ -35,19 +35,19 @@ class PkgHeader(object):
         self.encryptor = self.cipher.encryptor()
         puts("Encryptor initialized...")
 
-        self.metadata_offset: int = read_u32(f)
-        self.metadata_count: int = read_u32(f)
-        self.metadata_size: int = read_u32(f)
+        self.metadata_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.metadata_count: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.metadata_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         puts("Metadata Offset: {}".format(self.metadata_offset))
         puts("Metadata Count: {}".format(self.metadata_count))
         puts("Metadata Size: {}".format(self.metadata_size))
 
-        self.item_count: int = read_u32(f)
+        self.item_count: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         puts("Item Count: {}".format(self.item_count))
 
-        self.total_size: int = read_u64(f)
-        self.data_offset: int = read_u64(f)
-        self.data_size: int = read_u64(f)
+        self.total_size: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        self.data_offset: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        self.data_size: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
         puts("Total Size: {}".format(self.total_size))
         puts("Data Offset: {}".format(self.data_offset))
         puts("Data Size: {}".format(self.data_size))

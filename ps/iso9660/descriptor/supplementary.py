@@ -46,12 +46,8 @@ class SupplementaryVolumeDescriptor(BaseVolumeDescriptor):
         #: Volume Space Size (Number of Logical Blocks) LSB & MSB
         self.volume_space_size: int = unpack_both_endian_i32(data[80:88])
 
-        #: Unused Field (32 x 0x00)
-        self.unused_3: bytes = data[88:120]
-        if self.unused_3 != bytes([0x00] * 32):
-            raise InvalidISOException(
-                f"Unused field at index 88 should always be 32 x 0x00. Instead it is{hexlify(self.unused_3)}."
-            )
+        #: Escape Sequences
+        self.escape_sequences: bytes = data[88:120]
 
         #: Volume Set Size (Number of Disks) LSB & MSB
         self.volume_set_size: int = unpack_both_endian_i16(data[120:124])
@@ -89,7 +85,8 @@ class SupplementaryVolumeDescriptor(BaseVolumeDescriptor):
         if publisher_identifier_data[0] == 0x5F:
             # If first byte is 0x5F, self.publisher_identifier contains file name of data in the root directory
             self.publisher_identifier = unpack_str_a(publisher_identifier_data[1:128])
-        elif publisher_identifier_data == bytes([0x20] * 128):
+        elif publisher_identifier_data == bytes([0x20] * 128) or publisher_identifier_data == bytes([0x00] * 128):
+            # TODO: Remove this hack or see why it is used
             # If all bytes are 0x20, self.publisher_identifier is None since there is no data provided
             self.publisher_identifier = None
         else:
@@ -104,7 +101,9 @@ class SupplementaryVolumeDescriptor(BaseVolumeDescriptor):
         if data_preparer_identifier_data[0] == 0x5F:
             # If first byte is 0x5F, self.data_preparer_identifier contains file name of data in the root directory
             self.data_preparer_identifier = unpack_str_a(data_preparer_identifier_data[1:128])
-        elif data_preparer_identifier_data == bytes([0x20] * 128):
+        elif data_preparer_identifier_data == bytes([0x20] * 128) or data_preparer_identifier_data == bytes(
+                [0x00] * 128):
+            # TODO: Remove this hack or see why it is used
             # If all bytes are 0x20, self.data_preparer_identifier is None since there is no data provided
             self.data_preparer_identifier = None
         else:
@@ -118,11 +117,10 @@ class SupplementaryVolumeDescriptor(BaseVolumeDescriptor):
         application_identifier_data: bytes = data[574:702]
         if application_identifier_data[0] == 0x5F:
             # If first byte is 0x5F, self.application_identifier contains file name of data in the root directory
-
             self.application_identifier = unpack_str_a(application_identifier_data[1:128])
-        elif application_identifier_data == bytes([0x20] * 128):
+        elif application_identifier_data == bytes([0x20] * 128) or application_identifier_data == bytes([0x00] * 128):
+            # TODO: Remove this hack or see why it is used
             # If all bytes are 0x20, self.application_identifier is None since there is no data provided
-
             self.application_identifier = None
         else:
             raise InvalidISOException(

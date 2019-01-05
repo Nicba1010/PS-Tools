@@ -20,13 +20,23 @@ class PathTableRecord(object):
         directory_identifier_end_offset: int = 8 + self.directory_identifier_length
 
         #: Directory Identifier
-        self.directory_identifier: str = unpack_str_d(data[8:8 + directory_identifier_end_offset])
+        self.directory_identifier: str = unpack_str_d(data[8:directory_identifier_end_offset])
 
         #: Padding (None if file identifier length even, the field does not exist in that case)
         self.padding: int
-        if self.directory_identifier_length % 2 == 0 or self.directory_identifier == b'\x00'.decode('ASCII'):
+
+        #: Total Path Table Record Binary Size
+        self.size: int
+        if self.directory_identifier_length % 2 == 0:
             self.padding = None
+            self.size = directory_identifier_end_offset
         else:
             self.padding = data[directory_identifier_end_offset]
+            self.size = directory_identifier_end_offset + 1
         if self.padding is not None and self.padding != 0x00:
             raise InvalidISOException("Directory Record Padding is {hex(self.padding)} instead of 0x00 or None")
+
+        #: Path Table Record Size
+
+    def __repr__(self):
+        return f"<PathTableRecord id='{self.directory_identifier}' parent='{self.parent_directory_number}')>"

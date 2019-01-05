@@ -1,10 +1,9 @@
 import os
-import struct
 from typing import IO
 
 from clint.textui import puts
 
-from ps.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, read_u32, read_u64
+from ps.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, read_u32, read_u64, Endianess
 from .decryptor import DecryptorIO
 
 
@@ -12,12 +11,12 @@ class PkgEntry(object):
 
     def __init__(self, f: 'DecryptorIO'):
         self.f: IO = f
-        self.name_offset: int = read_u32(f)
-        self.name_size: int = read_u32(f)
-        self.file_offset: int = read_u64(f)
-        self.file_size: int = read_u64(f)
-        self.type: int = read_u32(f)
-        self.pad: int = read_u32(f)
+        self.name_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.name_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.file_offset: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        self.file_size: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        self.type: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.pad: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         puts("Name Offset: {}".format(self.name_offset))
         puts("Name Size: {}".format(self.name_size))
         puts("File Offset: {}".format(self.file_offset))
