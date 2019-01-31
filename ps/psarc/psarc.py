@@ -3,13 +3,14 @@ from typing import IO, List
 
 from clint.textui import indent, puts
 
+from ps.utils import read_u32, Endianess
 from .header import PSARCHeader
 
 
 class TOCEntry(object):
     def __init__(self, f: IO):
         self.hash: bytes = f.read(16)
-        self.block_index: int = read_u32(f)
+        self.block_index: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
         self.uncompressed_size: int = struct.unpack('>Q', bytes([0, 0, 0]) + f.read(5))[0]
         self.offset: int = struct.unpack('>Q', bytes([0, 0, 0]) + f.read(5))[0]
         puts("Hash: {}".format(self.hash))

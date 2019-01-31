@@ -5,7 +5,7 @@ import zlib
 from binascii import hexlify
 from typing import IO, List, Dict
 
-from ps.utils import read_u8, read_u32, unpack_u32
+from ps.utils import read_u8, read_u32, unpack_u32, Endianess
 from .constants import compressed_magic, uncompressed_magic, data2_patch_decryptor, data2_patch_encryptor
 from .errors import EmptyIRDException, InvalidIRDMagicException, InvalidIRDCRCException
 from .header import IRDHeader
@@ -36,7 +36,7 @@ class IRD(object):
                 logger.debug(f"ID (v7 only): {self.id}")
 
             #: ISO9660 Header Size
-            self.iso_header_size: int = read_u32(f, endianess='<')
+            self.iso_header_size: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
             logger.debug(f"Header Size: {self.iso_header_size}")
 
             # TODO: Write ISO9660 Header Parser
@@ -44,7 +44,7 @@ class IRD(object):
             self.iso_header: bytes = zlib.decompress(f.read(self.iso_header_size), 15 + 16)
 
             #: ISO9660 Footer Size
-            self.iso_footer_size: int = read_u32(f, endianess='<')
+            self.iso_footer_size: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
             logger.debug(f"Footer Size: {self.iso_footer_size}")
 
             # TODO: Write ISO9660 Footer Parser
@@ -63,7 +63,7 @@ class IRD(object):
                 logger.debug(f"Region {i} hash: {hexlify(region_hash)}")
 
             #: Number of file hash entries
-            self.file_count: int = read_u32(f, endianess='<')
+            self.file_count: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
             logger.debug(f"File Count: {self.file_count}")
 
             #: File Key -> File Hash map
@@ -102,7 +102,7 @@ class IRD(object):
 
             if self.version > 7:
                 #: TODO: Document this!
-                self.uid: str = read_u32(f, endianess='<')
+                self.uid: str = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
                 logger.debug(f"UID: {self.uid}")
 
             if verify and self.verify(f):
@@ -135,7 +135,7 @@ class IRD(object):
         :return: if declared CRC matches computed CRC
         """
         total_bytes_no_crc: int = f.tell()
-        crc: int = read_u32(f, endianess='<')
+        crc: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
         f.seek(0)
         computed_crc = zlib.crc32(f.read(total_bytes_no_crc))
         return crc == computed_crc

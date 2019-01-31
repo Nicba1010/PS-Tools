@@ -44,6 +44,32 @@ generate_xor_key(byte *pkg_data_riv, long long size, long long offset, byte *res
         i < size;
         i += 16)
     {
+        memcpy(result + i, array, 16);
+        for(int j = 15, k = 1;
+            (j >= 0) && k;
+            --j)
+        {
+            k = (++array[j] == 0);
+        }
+    }
+}
+
+extern void
+generate_debug_xor_key(byte *qa_digest, long long size, long long offset, byte *result)
+{
+    // TODO: SHA1 stuff, this doesnt work yet
+    byte array[64];
+    memcpy(array, qa_digest, 8);
+    memcpy(array + 8, qa_digest, 8);
+    memcpy(array + 16, qa_digest + 8, 8);
+    memcpy(array + 24, qa_digest + 8, 8);
+    memset(array + 32, 0, 32);
+
+    add(array + 48, 16, offset);
+    for(long long i = 0;
+        i < size;
+        i += 16)
+    {
         memcpy(result+i, array, 16);
         for(int j = 15, k = 1;
             (j >= 0) && k;

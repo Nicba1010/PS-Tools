@@ -72,7 +72,7 @@ str_c
 
 #### Type A1
 A subset of the [c-characters](#type-c). This subset is subject to
-agreement between the originator and the recepient of the volume.
+agreement between the originator and the recipient of the volume.
 Short:
 ~~~
 str_a1
@@ -80,7 +80,7 @@ str_a1
 
 #### Type D1
 A subset of the [a1-characters](#type-a1). This subset is subject to
-agreement between the originator and the recepient of the volume.
+agreement between the originator and the recipient of the volume.
 Short:
 ~~~
 str_d1

@@ -1,9 +1,6 @@
 import logging
-import os
+import sys
 
-from clint.textui import puts
-
-from ps.ird import IRD
 from ps.pkg import Pkg
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)-12s: %(levelname)-8s %(message)s')
@@ -18,8 +15,10 @@ if __name__ == '__main__':
     #     "EP2144-NPEB02133_00-AARUSAWAKENINGE3_bg_2_b7bcc2fbf0a9b27437b1040cfb16d694a16cf83b.pkg"
     # )
     # BLES02078 INVALID
+    Pkg("C:\\Users\\Nicba1010\\Downloads\\BATTLEFIELD_HARDLINE_NPUB31511_DELUXE_PACK_DLC_FIX.pkg")
+    sys.exit(1)
     skip = False
-    for root, dirs, files in os.walk("H:\PSN"):
+    for root, dirs, files in os.walk("G:\\OldBigBoiBackup\\PSNDL"):
         for file in files:
             if file.endswith(".pkg") and not skip:
                 file = os.path.join(root, file)

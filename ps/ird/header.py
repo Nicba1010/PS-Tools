@@ -9,6 +9,7 @@ GAME_ID_SIZE = 0x09
 
 logger = logging.getLogger('IRD Header')
 
+
 class IRDHeader(object):
     def __init__(self, f: IO):
         #: IRD magic string, should be: 3IRD

@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 
 from aenum import Enum
+# noinspection PyProtectedMember
 from bs4 import BeautifulSoup, Tag
 from requests import Session
 
@@ -55,6 +56,15 @@ class Firmware(object):
             self.release_date: datetime = None
             print("\tRelease Date Missing")
 
+        file_size_tag: Tag = soup.find('strong', text="Filesize")
+        if file_size_tag is not None:
+            file_size_text = release_date_tag.parent.parent.find_all('td')[-1].text
+            self.file_size: int = int(file_size_text[:-2]) * 1024 * 1024
+            print(f"\tFile Size: {self.file_size}")
+        else:
+            self.file_size: int = None
+            print("\tFile Size Missing")
+
         md5_checksum_tag: Tag = soup.find('strong', text="MD5 Checksum")
         if md5_checksum_tag is not None:
             md5_checksum_text: str = md5_checksum_tag.parent.parent.find_all('td')[-1].text
@@ -72,6 +82,8 @@ class Firmware(object):
             StackStorageDownloader(self.url, path, file_name=file_name)
 
 
+total = 0
+
 class SceParty(object):
     firmware_url = "https://sce.party/content/firmwares.php"
 
@@ -86,7 +98,9 @@ class SceParty(object):
                 firmware: Firmware = Firmware(a['data-resource'], a['data-section'], s)
                 path: str = os.path.join(self.file_root, firmware.type.name, firmware.version)
                 os.makedirs(path, exist_ok=True)
-                firmware.download(path)
+                global total
+                total += 1
+                # firmware.download(path)
 
 
 if __name__ == '__main__':
