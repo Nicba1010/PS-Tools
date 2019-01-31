@@ -1,0 +1,10 @@
+from aenum import Enum
+
+
+class ApplicationType(Enum):
+    DEFAULT = 0x00
+    THEME_AVATAR_ACTIVATION_KEY = 0x01
+    DISC_BIND_REGULAR_PSP_HD_REMASTER = 0x20
+    DISC_BIND_MODULES = 0x21
+    UNKNOWN_RIDGE_RACER_7_UPDATE = 0x30
+    UNKNOWN = 0x31
