@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from ps.pkg import Pkg, PkgEntry
+from ps.pkg import Pkg
 from ps.sfo.sfo import SFO
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')
@@ -25,17 +25,24 @@ def pkg():
 
 
 @pkg.command()
-@click.argument('file')
-def extract(**kwargs):
+@click.argument('file', type=str)
+def info(file: str):
+    """
+    Info about Sony Playstation 3 PKG file contents
+    """
+    Pkg(file)
+
+
+@pkg.command()
+@click.argument('file', type=str)
+def extract(file: str):
     """
     Extract Sony Playstation 3 PKG file contents
     """
-    file_path: str = kwargs["file"]
-    pkg_file: Pkg = Pkg(file_path)
-    file: PkgEntry
-    for file in pkg_file.files:
+    pkg_file: Pkg = Pkg(file)
+    for entry in pkg_file.files:
         # TODO: Fix to use title_id but need to fix metadata for that
-        file.save_file(f'{pkg_file.header.content_id}/', use_package_path=True)
+        entry.save_file(f'{pkg_file.header.content_id}/', use_package_path=True)
 
 
 @pstools.group()
@@ -53,7 +60,7 @@ def info(file: str):
     Info about Sony Playstation SFO file contents
     """
     file_path: str = file
-    sfo_file: SFO = SFO(file_path)
+    SFO(file_path)
 
 
 @sfo.command()
