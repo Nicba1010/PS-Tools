@@ -26,20 +26,22 @@ def pkg():
 
 @pkg.command()
 @click.argument('file', type=str)
-def info(file: str):
+@click.option('--verify/--no-verify', default=True)
+def info(file: str, verify: bool):
     """
     Info about Sony Playstation 3 PKG file contents
     """
-    Pkg(file)
+    Pkg(file, verify_pkg_hash=verify)
 
 
 @pkg.command()
 @click.argument('file', type=str)
-def extract(file: str):
+@click.option('--verify/--no-verify', default=True)
+def extract(file: str, verify: bool):
     """
     Extract Sony Playstation 3 PKG file contents
     """
-    pkg_file: Pkg = Pkg(file)
+    pkg_file: Pkg = Pkg(file, verify_pkg_hash=verify)
     for entry in pkg_file.files:
         # TODO: Fix to use title_id but need to fix metadata for that
         entry.save_file(f'{pkg_file.header.content_id}/', use_package_path=True)
