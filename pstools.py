@@ -59,9 +59,9 @@ def info(file: str):
 @sfo.command()
 @click.argument('file', type=str)
 @click.option('--out-file', '-o', default=None, type=str)
-def change(file: str, out_file: str):
+def edit(file: str, out_file: str):
     """
-    Change Sony Playstation SFO file contents
+    Edit Sony Playstation SFO file contents
     """
     sfo_file: SFO = SFO(file)
     while True:
