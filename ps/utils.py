@@ -1,7 +1,6 @@
 import ctypes
 import os
 import struct
-import subprocess
 from ctypes import cdll
 from typing import IO
 
@@ -18,9 +17,9 @@ max_int64 = 0xFFFFFFFFFFFFFFFF
 
 xor_lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), './xor.lib')
 xor_c_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), './xor.c')
-if not os.path.exists(xor_lib_path):
-    # TODO: Fix
-    subprocess.check_output(['gcc', xor_c_path, '-shared', '-std=c99', '-O3'])
+# if not os.path.exists(xor_lib_path):
+# TODO: Fix
+# subprocess.check_output(['gcc', xor_c_path, '-shared', '-std=c99', '-O3'])
 
 xor_lib = cdll.LoadLibrary(xor_lib_path)
 xor_lib.generate_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
