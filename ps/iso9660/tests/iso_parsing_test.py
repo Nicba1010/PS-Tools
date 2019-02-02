@@ -4,7 +4,7 @@ import unittest
 
 from ps.iso9660.iso9660 import ISO9660
 
-logging.basicConfig(level=logging.DEBUG, format='%(name)-12s: %(levelname)-8s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')
 
 
 class ISOParsingTest(unittest.TestCase):
