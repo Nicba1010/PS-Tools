@@ -1,15 +1,20 @@
 import logging
+import os
 
 import click
 
 from ps.pkg import Pkg
-from ps.sfo.sfo import SFO
+from ps.psarc import PSARC
+from ps.sfo import SFO
 
-logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')
 
-
-@click.group('pkg')
-def pstools():
+@click.group()
+@click.option('-v', '--verbose', count=True)
+def pstools(verbose: int):
+    if verbose == 1:
+        logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')
+    else:
+        logging.basicConfig(level=logging.INFO, format='%(name)-24s: %(levelname)-8s %(message)s')
     """
     A comprehensive set of tools related to the Sony Playstation console files
     """
@@ -61,8 +66,7 @@ def info(file: str):
     """
     Info about Sony Playstation SFO file contents
     """
-    file_path: str = file
-    SFO(file_path)
+    SFO(file)
 
 
 @sfo.command()
@@ -84,6 +88,43 @@ def edit(file: str, out_file: str):
         data: str = input('Enter entry data: ')
         sfo_file.set_data(key, data)
         sfo_file.print_key_data_map()
+
+
+@pstools.group()
+def psarc():
+    """
+    A set of tools to be used with the Sony Playstation Archive (PSARC) file format
+    """
+    pass
+
+
+@psarc.command()
+@click.argument('file')
+def info(file: str):
+    """
+    Info about Sony Playstation Archive (PSARC) file contents
+    """
+    PSARC(file)
+
+
+# noinspection PyShadowingBuiltins
+@psarc.command()
+@click.argument('file', type=str)
+@click.option('--dir', default=None, type=str, help='target directory for extraction (default = archive name)')
+@click.option('--use-package-path/--no-use-package-path', default=True, help='extract with directory structure')
+@click.option('--create-directories/--no-create-directories', default=True, help='create needed directory structure')
+@click.option('--overwrite/--no-overwrite', default=True, help='overwrite already extracted files')
+def extract(file: str, dir: str, use_package_path: bool, create_directories: bool, overwrite: bool):
+    """
+    Extract Sony Playstation Archive (PSARC) file contents
+    """
+    psarc_file: PSARC = PSARC(file)
+    if dir is None:
+        dir = f'./{os.path.basename(file)}/'
+    for entry in psarc_file.entries[1:]:
+        psarc_file.save_entry(
+            entry, dir, use_package_path=use_package_path, create_directories=create_directories, overwrite=overwrite
+        )
 
 
 if __name__ == '__main__':

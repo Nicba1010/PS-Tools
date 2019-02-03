@@ -63,26 +63,26 @@ def get_update_for_id(id):
             'updates': [
                 {
                     'version': x['version'],
-                    'ps3_system_ver': x.get('ps3_system_ver', -1.0),
+                    'ps3_system_ver': x.get_decompression_stream('ps3_system_ver', -1.0),
                     'packages': [
                         {
                             'url': x['url'],
                             'size': x['size'],
                             'sha1sum': binascii.unhexlify(x['sha1sum']),
-                            'drm_type': x.get('drm_type', 'local')
+                            'drm_type': x.get_decompression_stream('drm_type', 'local')
                         },
                         {
                             'url': x.find('url')['url'],
                             'size': x.find('url')['size'],
                             'sha1sum': binascii.unhexlify(x.find('url')['sha1sum']),
-                            'drm_type': x.find('url').get('drm_type', 'local')
+                            'drm_type': x.find('url').get_decompression_stream('drm_type', 'local')
                         }
                     ] if x.find('url') is not None else [
                         {
                             'url': x['url'],
                             'size': x['size'],
                             'sha1sum': binascii.unhexlify(x['sha1sum']),
-                            'drm_type': x.get('drm_type', 'local')
+                            'drm_type': x.get_decompression_stream('drm_type', 'local')
                         }
                     ]
                 }

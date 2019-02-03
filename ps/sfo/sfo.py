@@ -179,6 +179,6 @@ class SFO(object):
             logger.info(f'SFO File Written!')
 
     def __del__(self):
-        logger.info('Cleaning up SFO file object...')
+        logger.info('Cleaning up...')
         if not self.file_handle.closed:
             self.file_handle.close()

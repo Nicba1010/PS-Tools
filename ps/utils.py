@@ -28,6 +28,14 @@ xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 
 
+def human_size(size_: int, format_: str = '3.2'):
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+        if abs(size_) < 1024.0:
+            return f"{size_:{format_}f} {unit}B"
+        size_ /= 1024.0
+    return f"{size_:.1f} YiB"
+
+
 def file_md5(filename: str, block_size=4096) -> bytes:
     hasher: hashlib = hashlib.md5()
     with open(filename, "rb") as f:

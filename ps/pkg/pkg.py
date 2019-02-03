@@ -87,5 +87,6 @@ class Pkg(object):
             return pkg_hash == sha1.digest()
 
     def __del__(self):
-        puts("Cleaning up PKG file object...")
-        self.file_handle.close()
+        puts('Cleaning up...')
+        if not self.file_handle.closed:
+            self.file_handle.close()

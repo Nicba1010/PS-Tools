@@ -1,49 +1,52 @@
+import logging
 from typing import IO
 
-from aenum import Enum
-from clint.textui import puts
-
 from ps.utils import read_u32, read_u16, Endianess
-from .errors import InvalidPSARCError
+from .compression_type import CompressionType
+from .constants import magic
+from .errors import InvalidPSARCMagicException
+from .path_type import ArchivePathType
 
-magic: bytes = b'PSAR'
-
-
-class CompressionType(Enum):
-    ZLIB = b'zlib'
-    LZMA = b'lzma'
-
-
-class ArchivePathType(Enum):
-    RELATIVE = 0x00
-    IGNORE_CASE = 0x01
-    ABSOLUTE = 0x02
+logger = logging.getLogger('PSARC Header')
 
 
 class PSARCHeader(object):
     def __init__(self, f: IO):
+        #: PSARC Magic String (should ne PSAR)
         self.magic: bytes = f.read(4)
-        print("PSARC Magic: {}".format(self.magic))
+        logger.info(f'PSARC Magic: {self.magic}')
 
         if self.magic != magic:
-            raise InvalidPSARCError
+            raise InvalidPSARCMagicException
         else:
-            puts("Magic Verified")
+            logger.info('Magic Verified')
 
-        self.version_major: int = read_u16(f, endianess=Endianess.LITTLE_ENDIAN)
-        self.version_minor: int = read_u16(f, endianess=Endianess.LITTLE_ENDIAN)
-        puts("Version: v{}.{}".format(self.version_major, self.version_minor))
+        #: PSARC Minor and Major File Versions
+        self.version_major: int = read_u16(f, endianess=Endianess.BIG_ENDIAN)
+        self.version_minor: int = read_u16(f, endianess=Endianess.BIG_ENDIAN)
+        logger.info(f'Version: v{self.version_major}.{self.version_minor}')
 
+        #: PSARC Compression Type
         self.compression_type: CompressionType = CompressionType(f.read(4))
-        puts("Compression Type: {}".format(self.compression_type))
+        logger.info(f'Compression Type: {self.compression_type}')
 
-        self.toc_length: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
-        self.toc_entry_size: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
-        self.toc_entries: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
-        self.block_size: int = read_u32(f, endianess=Endianess.LITTLE_ENDIAN)
-        self.archive_path_type: ArchivePathType = ArchivePathType(read_u32(f, endianess=Endianess.LITTLE_ENDIAN))
-        puts("TOC Length: {}".format(self.toc_length))
-        puts("TOC Entry Size: {}".format(self.toc_entry_size))
-        puts("TOC Entries: {}".format(self.toc_entries))
-        puts("Block Size: {}".format(self.block_size))
-        puts("Archive Path Type: {}".format(self.archive_path_type))
+        #: PSARC TOC Length
+        self.toc_length: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        logger.info(f'TOC Length: {self.toc_length}')
+
+        #: PSARC TOC Entry Size
+        self.toc_entry_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        logger.info(f'TOC Entry Size: {self.toc_entry_size}')
+
+        #: PSARC TOC Entry Count
+        self.toc_entry_count: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        logger.info(f'TOC Entries: {self.toc_entry_count}')
+
+        #: PSARC Block Size
+        self.block_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        logger.info(f'Block Size: {self.block_size}')
+
+        #: PSARC Archive Path Type
+        # TODO: Fucking use this actually
+        self.archive_path_type: ArchivePathType = ArchivePathType(read_u32(f, endianess=Endianess.BIG_ENDIAN))
+        logger.info(f'Archive Path Type: {self.archive_path_type}')

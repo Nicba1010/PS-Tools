@@ -27,7 +27,8 @@ def download_file_post(url: str, data: Dict, session: Session = Session(), path:
 
     path: str = os.path.join(path, file_name)
 
-    if not os.path.exists(path) or os.stat(path).st_size != int(r.headers.get('Content-Length', default='-1')):
+    if not os.path.exists(path) or os.stat(path).st_size != int(
+            r.headers.get_decompression_stream('Content-Length', default='-1')):
         with open(path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=2 * 1024 * 1024):
                 if chunk:
