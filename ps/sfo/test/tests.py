@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from ps.sfo.sfo import SFO
+from ps.sfo import SFO
 from ps.utils import file_md5
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')

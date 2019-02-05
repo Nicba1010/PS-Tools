@@ -22,10 +22,11 @@ xor_c_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), './xor.c'
 # TODO: Fix
 # subprocess.check_output(['gcc', xor_c_path, '-shared', '-std=c99', '-O3'])
 
-xor_lib = cdll.LoadLibrary(xor_lib_path)
-xor_lib.generate_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
-xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
-xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
+if os.name == 'nt':
+    xor_lib = cdll.LoadLibrary(xor_lib_path)
+    xor_lib.generate_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
+    xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
+    xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 
 
 def human_size(size_: int, format_: str = '3.2'):
