@@ -3,7 +3,7 @@ import sys
 
 from ps.pkg import Pkg
 
-logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(message)s')
 
 if __name__ == '__main__':
     print("test")

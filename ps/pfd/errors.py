@@ -1,3 +1,5 @@
+from binascii import hexlify
+
 from .constants import magic
 
 
@@ -22,4 +24,11 @@ class InvalidPFDVersionException(InvalidPFDException):
     def __init__(self):
         super(InvalidPFDVersionException, self).__init__(
             f'Invalid PFD version. Should be either 3 or 4.'
+        )
+
+
+class InvalidFieldException(InvalidPFDException):
+    def __init__(self, field_name: str, value: bytes, correct_value: bytes):
+        super(InvalidFieldException, self).__init__(
+            f'Invalid field: {field_name}. Should be either {hexlify(value)} instead it is {hexlify(correct_value)}.'
         )

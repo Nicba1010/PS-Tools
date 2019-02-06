@@ -7,7 +7,7 @@ import unittest
 from ps.psarc.psarc import PSARC
 from ps.utils import file_md5
 
-logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(message)s')
 
 logger = logging.getLogger('PSARC Test')
 

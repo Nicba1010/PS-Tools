@@ -55,19 +55,19 @@ class PFDHeader(object):
         logger.info(f'Header Table Decrypted: {hexlify(self.header_data_decrypted)}')
 
         #: Y Table HMAC
-        self.y_table_hmac: bytes = self.header_data_decrypted[0:20]
+        self.y_table_hmac: bytes = bytes(self.header_data_decrypted[0:20])
         logger.info(f'Y Table HMAC: {hexlify(self.header_data_decrypted)}')
 
         #: X Table & Entry Table HMAC
-        self.x_table_entry_table_hmac: bytes = self.header_data_decrypted[20:40]
+        self.x_table_entry_table_hmac: bytes = bytes(self.header_data_decrypted[20:40])
         logger.info(f'X Table & Entry Table HMAC Table HMAC: {hexlify(self.x_table_entry_table_hmac)}')
 
         #: File HMAC Key
-        self.file_hmac_key: bytes = self.header_data_decrypted[40:60]
+        self.file_hmac_key: bytes = bytes(self.header_data_decrypted[40:60])
         logger.info(f'File HMAC Key: {hexlify(self.file_hmac_key)}')
 
         #: Padding
-        self.padding: bytes = self.header_data_decrypted[60:64]
+        self.padding: bytes = bytes(self.header_data_decrypted[60:64])
         logger.info(f'Padding: {hexlify(self.padding)}')
 
         if self.version == 3:
@@ -81,9 +81,9 @@ class PFDHeader(object):
         logger.info(f'XY Tables Reserved Entries: {self.xy_tables_reserved_entry_count}')
 
         #: Protected Files Table Reserved Entries
-        self.protected_tables_reserved_entry_count: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
-        logger.info(f'Protected Files Table Reserved Entries: {self.protected_tables_reserved_entry_count}')
+        self.protected_files_table_reserved_entry_count: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        logger.info(f'Protected Files Table Reserved Entries: {self.protected_files_table_reserved_entry_count}')
 
         #: Protected Files Table Used Entries
-        self.protected_tables_used_entry_count: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
-        logger.info(f'Protected Files Table Used Entries: {self.protected_tables_used_entry_count}')
+        self.protected_files_table_used_entry_count: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        logger.info(f'Protected Files Table Used Entries: {self.protected_files_table_used_entry_count}')

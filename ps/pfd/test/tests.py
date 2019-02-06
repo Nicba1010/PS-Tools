@@ -4,7 +4,7 @@ import unittest
 
 from ps.pfd import PFD
 
-logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(message)s')
 
 logger = logging.getLogger('PFD Test')
 

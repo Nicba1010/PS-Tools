@@ -12,9 +12,9 @@ from ps.sfo import SFO
 @click.option('-v', '--verbose', count=True)
 def pstools(verbose: int):
     if verbose == 1:
-        logging.basicConfig(level=logging.DEBUG, format='%(name)-24s: %(levelname)-8s %(message)s')
+        logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(message)s')
     else:
-        logging.basicConfig(level=logging.INFO, format='%(name)-24s: %(levelname)-8s %(message)s')
+        logging.basicConfig(level=logging.INFO, format='%(name)-32s: %(levelname)-8s %(message)s')
     """
     A comprehensive set of tools related to the Sony Playstation console files
     """
