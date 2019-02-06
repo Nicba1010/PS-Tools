@@ -3,9 +3,9 @@ import os
 
 import click
 
-from ps.pkg import Pkg
-from ps.psarc import PSARC
-from ps.sfo import SFO
+from ps.file.format.pkg import Pkg
+from ps.file.format.psarc import PSARC
+from ps.file.format.sfo import SFO
 
 
 @click.group()

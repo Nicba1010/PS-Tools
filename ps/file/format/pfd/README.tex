@@ -1,0 +1,18 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\begin{document}
+    \title{Sony PFD File Format}
+    \author{Roberto Anić Banić}
+    \maketitle
+
+    \lstset{language=C}
+    \begin{lstlisting}[frame=single]
+        tyepdef struct
+        {
+        u64 magic;
+        u64 version;
+        } pfd_header_t;
+    \end{lstlisting}
+\end{document}

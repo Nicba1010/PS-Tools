@@ -3,6 +3,7 @@ import hashlib
 import os
 import struct
 from ctypes import cdll
+from logging import getLoggerClass, addLevelName, setLoggerClass, NOTSET
 from typing import IO
 
 DEFAULT_LOCAL_IO_BLOCK_SIZE = 8 * 1024 * 1024
@@ -21,6 +22,23 @@ xor_c_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), './xor.c'
 # if not os.path.exists(xor_lib_path):
 # TODO: Fix
 # subprocess.check_output(['gcc', xor_c_path, '-shared', '-std=c99', '-O3'])
+
+
+VERBOSE = 5
+
+
+class Logger(getLoggerClass()):
+    def __init__(self, name, level=NOTSET):
+        super().__init__(name, level)
+
+        addLevelName(VERBOSE, "VERBOSE")
+
+    def verbose(self, msg, *args, **kwargs):
+        if self.isEnabledFor(VERBOSE):
+            self._log(VERBOSE, msg, args, **kwargs)
+
+
+setLoggerClass(Logger)
 
 if os.name == 'nt':
     xor_lib = cdll.LoadLibrary(xor_lib_path)
