@@ -1,1 +1,0 @@
-from .str import STR

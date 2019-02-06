@@ -1,1 +1,0 @@
-magic: bytes = b'PSAR'

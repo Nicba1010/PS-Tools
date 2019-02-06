@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from ps.file.format.pkg import Pkg
+from format import Pkg
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(message)s')
 

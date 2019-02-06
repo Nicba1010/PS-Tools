@@ -3,9 +3,9 @@ import os
 
 import click
 
-from ps.file.format.pkg import Pkg
-from ps.file.format.psarc import PSARC
-from ps.file.format.sfo import SFO
+from format import PKG
+from format import PSARC
+from format import SFO
 
 
 @click.group()
@@ -36,7 +36,7 @@ def info(file: str, verify: bool):
     """
     Info about Sony Playstation 3 PKG file contents
     """
-    Pkg(file, verify_pkg_hash=verify)
+    PKG(file, verify_pkg_hash=verify)
 
 
 @pkg.command()
@@ -46,7 +46,7 @@ def extract(file: str, verify: bool):
     """
     Extract Sony Playstation 3 PKG file contents
     """
-    pkg_file: Pkg = Pkg(file, verify_pkg_hash=verify)
+    pkg_file: PKG = PKG(file, verify_pkg_hash=verify)
     for entry in pkg_file.files:
         # TODO: Fix to use title_id but need to fix metadata for that
         entry.save_file(f'{pkg_file.header.content_id}/', use_package_path=True)
