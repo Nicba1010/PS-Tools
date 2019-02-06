@@ -4,8 +4,8 @@ from operator import xor
 
 from aenum import IntFlag, MultiValueEnum
 
-from format._fix_incomplete_iso9660 import InvalidISOException
-from format._fix_incomplete_iso9660 import unpack_both_endian_u16, unpack_iso_volume_datetime, unpack_str_a
+from format._fix_incomplete_iso9660.errors import InvalidISOException
+from format._fix_incomplete_iso9660.utils import unpack_both_endian_u16, unpack_iso_volume_datetime, unpack_str_a
 from utils.utils import unpack_u16, unpack_u8
 
 

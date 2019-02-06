@@ -1,5 +1,5 @@
-from format._fix_incomplete_iso9660 import InvalidISOException
-from format._fix_incomplete_iso9660 import unpack_str_d
+from format._fix_incomplete_iso9660.errors import InvalidISOException
+from format._fix_incomplete_iso9660.utils import unpack_str_d
 from utils.utils import unpack_u8, unpack_u32, unpack_u16, Endianess
 
 

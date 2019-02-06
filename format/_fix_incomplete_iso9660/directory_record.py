@@ -2,9 +2,9 @@ from datetime import datetime
 
 from aenum import IntFlag
 
-from format._fix_incomplete_iso9660 import InvalidISOException
-from format._fix_incomplete_iso9660 import unpack_both_endian_u32, unpack_both_endian_u16, unpack_str_a, \
-    unpack_directory_record_datetime
+from format._fix_incomplete_iso9660.errors import InvalidISOException
+from format._fix_incomplete_iso9660.utils import unpack_both_endian_u32, unpack_directory_record_datetime, \
+    unpack_both_endian_u16, unpack_str_a
 from utils.utils import unpack_u8
 
 

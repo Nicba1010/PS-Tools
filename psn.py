@@ -41,6 +41,7 @@ def get_soup(url):
     return BeautifulSoup(response.content, 'lxml')
 
 
+# noinspection PyShadowingBuiltins
 def get_update_for_id(id):
     soup = get_soup_for_code(id)
     if soup is None:
@@ -117,7 +118,7 @@ def test():
 def psn_updates():
     print(sqlalchemy.__version__)
     Base.metadata.create_all(engine)
-    session = Session()
+    # session = Session()
     print(CreateTable(Product.__table__).compile(engine))
     print(CreateTable(Title.__table__).compile(engine))
     print(CreateTable(TitleName.__table__).compile(engine))
@@ -152,7 +153,7 @@ def psn_updates():
                 t = None
                 if t is None:
                     print("Title doesn't exist yet")
-                    product = Product(name=update['title'])
+                    # product = Product(name=update['title'])
                 else:
                     print("Title exists")
 

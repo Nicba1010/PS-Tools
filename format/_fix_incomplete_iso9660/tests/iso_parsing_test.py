@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from format._fix_incomplete_iso9660 import ISO9660
+from format._fix_incomplete_iso9660.iso9660 import ISO9660
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(message)s')
 

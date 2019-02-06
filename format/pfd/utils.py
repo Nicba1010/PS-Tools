@@ -13,8 +13,3 @@ def load_secure_file_ids() -> Dict[str, bytes]:
                 for id_ in current_ids:
                     data[id_] = unhexlify(line.split('=')[1].strip())
     return data
-
-
-if __name__ == '__main__':
-    data = load_secure_file_ids()
-    a = 4

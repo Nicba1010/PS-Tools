@@ -16,3 +16,4 @@ pycparser
 requests
 six
 urllib3
+sqlalchemy

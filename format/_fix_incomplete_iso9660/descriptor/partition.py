@@ -1,5 +1,5 @@
-from format._fix_incomplete_iso9660 import InvalidISOException
-from format._fix_incomplete_iso9660 import unpack_str_a, unpack_str_d, unpack_both_endian_i32
+from format._fix_incomplete_iso9660.errors import InvalidISOException
+from format._fix_incomplete_iso9660.utils import unpack_str_a, unpack_str_d, unpack_both_endian_i32
 from .base import BaseVolumeDescriptor
 
 

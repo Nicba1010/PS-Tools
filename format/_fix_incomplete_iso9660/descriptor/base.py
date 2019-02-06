@@ -1,4 +1,4 @@
-from format._fix_incomplete_iso9660 import unpack_str_a
+from format._fix_incomplete_iso9660.utils import unpack_str_a
 from .type import DescriptorType
 
 

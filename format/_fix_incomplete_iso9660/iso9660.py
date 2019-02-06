@@ -54,9 +54,6 @@ class ISO9660(object):
                         while path_table_offset < volume_descriptor.path_table_size:
                             path_table_record: PathTableRecord = PathTableRecord(path_table_data[path_table_offset:])
                             path_table_offset += path_table_record.size
-                            b = 4
-
-            a = 4
 
     @staticmethod
     def create_descriptor(data: bytes) -> BaseVolumeDescriptor:

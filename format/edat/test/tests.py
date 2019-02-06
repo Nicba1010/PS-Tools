@@ -9,6 +9,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(
 
 class IrdParsingTest(unittest.TestCase):
 
+    # noinspection PyMethodMayBeStatic
     def test_parser_ird(self):
         for root, dirs, files in os.walk(os.path.dirname(os.path.realpath(__file__))):
             for file in files:
