@@ -3,9 +3,11 @@ import hashlib
 import os
 import struct
 from ctypes import cdll
-from logging import getLoggerClass, addLevelName, setLoggerClass, NOTSET
+from logging import setLoggerClass
 from sys import platform
 from typing import IO
+
+from .logger import Logger
 
 DEFAULT_LOCAL_IO_BLOCK_SIZE = 8 * 1024 * 1024
 
@@ -32,20 +34,6 @@ xor_lib = cdll.LoadLibrary(xor_lib_path)
 xor_lib.generate_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
 xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
-
-VERBOSE = 5
-
-
-class Logger(getLoggerClass()):
-    def __init__(self, name, level=NOTSET):
-        super().__init__(name, level)
-
-        addLevelName(VERBOSE, "VERBOSE")
-
-    def verbose(self, msg, *args, **kwargs):
-        if self.isEnabledFor(VERBOSE):
-            self._log(VERBOSE, msg, args, **kwargs)
-
 
 setLoggerClass(Logger)
 
