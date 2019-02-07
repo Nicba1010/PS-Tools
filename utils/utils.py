@@ -32,6 +32,7 @@ elif platform == "win32":
 xor_lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), f'./xor.{lib_name}.lib')
 xor_lib = cdll.LoadLibrary(xor_lib_path)
 xor_lib.generate_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
+xor_lib.generate_debug_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
 xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 

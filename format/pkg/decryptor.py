@@ -4,6 +4,7 @@ from cryptography.hazmat.primitives.ciphers import CipherContext
 
 from utils.utils import xor_lib
 from .header import PkgHeader
+from .revision import PkgRevision
 
 
 # noinspection PyAbstractClass
@@ -40,7 +41,10 @@ class DecryptorIO(IO):
         # 16-byte blocks since header specified DATA_OFFSET
         block_offset: int = (starting_offset - self.header.data_offset) // 16
         # IMPORTANT: This increments pkg_data_riv by 1
-        xor_lib.generate_xor_key(self.header.pkg_data_riv, xor_key_size, block_offset, xor_key)
+        if self.header.revision == PkgRevision.RETAIL:
+            xor_lib.generate_xor_key(self.header.pkg_data_riv, xor_key_size, block_offset, xor_key)
+        else:
+            xor_lib.generate_debug_xor(self.header.pkg_data_riv, xor_key_size, block_offset, xor_key)
         return self.encryptor.update(bytes(xor_key))
 
     def readable(self) -> bool:
