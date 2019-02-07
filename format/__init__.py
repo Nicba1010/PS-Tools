@@ -1,4 +1,4 @@
-from ._fix_pkg import PKG
+from .pkg import PKG
 from .edat import EDAT
 from .ird import IRD
 from .pfd import PFD

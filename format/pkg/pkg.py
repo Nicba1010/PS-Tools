@@ -2,14 +2,12 @@ import hashlib
 import os
 from typing import List
 
-from clint.textui import puts, indent
-
 from base.file_format import FileFormatWithMagic
 from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE
 from .content_type import ContentType
 from .decryptor import DecryptorIO
 from .drm_type import DrmType
-from .entry import PkgEntry
+from .entry import PKGEntry
 from .errors import InvalidPKGHeaderHashException, InvalidPKGHashException
 from .header import PkgHeader
 from .metadata import PkgMetadata
@@ -25,17 +23,17 @@ class PKG(FileFormatWithMagic[PkgHeader]):
         self.file_handle.seek(0x00)
         sha1.update(self.file_handle.read(0x80))
 
-        # TODO: Why DEBUG pkg always fail?
+        # TODO: Why DEBUG pkg hash always fail?
         if sha1.digest()[-8:] != self.header.header_sha1_hash and self.header.revision != PkgRevision.DEBUG:
             raise InvalidPKGHeaderHashException()
         else:
-            puts("Header SHA1 Hash Verified!")
+            self.logger.info('Header SHA1 Hash Verified!')
 
         if verify_pkg_hash:
             if not self.verify():
                 raise InvalidPKGHashException()
             else:
-                puts("PKG SHA1 Hash Verified!")
+                self.logger.info('PKG SHA1 Hash Verified!')
 
         self.drm_type: DrmType = None
         self.content_type: ContentType = None
@@ -50,18 +48,16 @@ class PKG(FileFormatWithMagic[PkgHeader]):
         self.file_handle.seek(self.header.metadata_offset)
 
         for metadata_index in range(0, self.header.metadata_count):
-            puts("Processing metadata on index {}:".format(metadata_index))
-            with indent(4, '>>>'):
-                self.metadata.append(PkgMetadata.create(self.file_handle))
+            self.logger.info(f'Processing metadata #{metadata_index}:')
+            self.metadata.append(PkgMetadata.create(self.file_handle))
 
         self.file_handle.seek(self.header.data_offset)
-        self.files: List[PkgEntry] = []
+        self.files: List[PKGEntry] = []
         with DecryptorIO(self.header, self.file_handle) as fd:
             for item_index in range(0, self.header.item_count):
-                puts("Processing item on index {}:".format(item_index))
-                with indent(4, '>>>'):
-                    self.file_handle.seek(self.header.data_offset + PkgEntry.size() * item_index)
-                    self.files.append(PkgEntry(fd))
+                self.logger.info(f'Processing file #{item_index}:')
+                self.file_handle.seek(self.header.data_offset + PKGEntry.size() * item_index)
+                self.files.append(PKGEntry(fd))
 
     def verify(self) -> bool:
         with open(self.path, 'rb') as f:
@@ -80,8 +76,3 @@ class PKG(FileFormatWithMagic[PkgHeader]):
                 to_read -= len(data)
 
             return pkg_hash == sha1.digest()
-
-    def __del__(self):
-        puts('Cleaning up...')
-        if not self.file_handle.closed:
-            self.file_handle.close()

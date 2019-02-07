@@ -1,43 +1,48 @@
 import os
 from typing import IO
 
-from clint.textui import puts
-
 from base import LoggingClass
+from format.pkg.decryptor import DecryptorIO
 from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, read_u32, read_u64, Endianess
-from .decryptor import DecryptorIO
-from .entry_type import EntryType
+from .type import EntryType
 
 
-class PkgEntry(LoggingClass):
+class PKGEntry(LoggingClass):
 
-    def __init__(self, f: 'DecryptorIO'):
+    def __init__(self, f: DecryptorIO):
         super().__init__()
-
         self.f: IO = f
+
         self.name_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.debug(f"Name Offset: {self.name_offset}")
+
         self.name_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.debug(f"Name Size: {self.name_size}")
+
         self.file_offset: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.debug(f"File Offset: {self.file_offset}")
+
         self.file_size: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f"File Size: {self.file_size}")
+
         entry_flags = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         # TODO: Use flags or do this better somehow
         self.flag_overwrite: bool = (entry_flags >> 3 & 0x80) > 0
+        self.logger.debug(f"Overwrite: {self.flag_overwrite}")
+
         self.flag_psp: bool = (entry_flags >> 3 & 0x10) > 0
+        self.logger.debug(f"PSP: {self.flag_psp}")
+
         self.type: EntryType = EntryType(entry_flags & 0xFF)
+        self.logger.info(f"Type: {self.type}")
+
         self.pad: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        puts(f"Name Offset: {self.name_offset}")
-        puts(f"Name Size: {self.name_size}")
-        puts(f"File Offset: {self.file_offset}")
-        puts(f"File Size: {self.file_size}")
-        puts(f"Type: {self.type}")
-        puts(f"Overwrite: {self.flag_overwrite}")
-        puts(f"PSP: {self.flag_psp}")
-        puts(f"Pad: {self.pad}")
+        self.logger.debug(f"Pad: {self.pad}")
 
         f.seek(self.name_offset, DecryptorIO.SEEK_DATA_OFFSET)
         # Not decoded to ASCII or UTF8 because some packages even though they are valid, have invalid characters
         self.name: str = f.read(self.name_size).decode('UTF-8')
-        puts(f"Name: {self.name}")
+        self.logger.info(f"Name: {self.name}")
 
     @property
     def is_file(self):
@@ -65,7 +70,7 @@ class PkgEntry(LoggingClass):
             os.makedirs(directory)
 
         if self.is_file:
-            puts(f'Extracting file: {self.name} -> {path}')
+            self.logger.info(f'Extracting file: {self.name} -> {path}')
             if not os.path.exists(path) or self.flag_overwrite:
                 with open(path, 'wb') as export:
                     self.f.seek(self.file_offset, DecryptorIO.SEEK_DATA_OFFSET)
@@ -75,6 +80,6 @@ class PkgEntry(LoggingClass):
                         bytes_remaining -= export.write(self.f.read(to_read))
                     return True
         else:
-            puts(f'Creating directory: {self.name} -> {path}')
+            self.logger.info(f'Creating directory: {self.name} -> {path}')
             os.makedirs(path)
             return True

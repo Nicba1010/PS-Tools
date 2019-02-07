@@ -1,7 +1,6 @@
 from binascii import hexlify
 from typing import IO
 
-from clint.textui import puts
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import algorithms, Cipher, modes
 
@@ -19,34 +18,34 @@ class PkgHeader(MagicFileHeader):
 
         self.revision: PkgRevision = PkgRevision(f.read(2))
         self.type: PkgType = PkgType(f.read(2))
-        puts("PKG Revision: {}".format(self.revision))
-        puts("PKG Type: {}".format(self.type))
+        self.logger.info(f'PKG Revision: {self.revision}')
+        self.logger.info(f'PKG Type: {self.type}')
 
         self.cipher = Cipher(algorithms.AES(
             ps3_aes_key if self.type == PkgType.PS3 else psp_aes_key
         ), modes.ECB(), backend=backend)
         self.encryptor = self.cipher.encryptor()
-        puts("Encryptor initialized...")
+        self.logger.info("Encryptor initialized...")
 
         self.metadata_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.metadata_count: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.metadata_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        puts("Metadata Offset: {}".format(self.metadata_offset))
-        puts("Metadata Count: {}".format(self.metadata_count))
-        puts("Metadata Size: {}".format(self.metadata_size))
+        self.logger.info(f'Metadata Offset: {self.metadata_offset}')
+        self.logger.info(f'Metadata Count: {self.metadata_count}')
+        self.logger.info(f'Metadata Size: {self.metadata_size}')
 
         self.item_count: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        puts("Item Count: {}".format(self.item_count))
+        self.logger.info(f'Item Count: {self.item_count}')
 
         self.total_size: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
         self.data_offset: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
         self.data_size: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
-        puts("Total Size: {}".format(self.total_size))
-        puts("Data Offset: {}".format(self.data_offset))
-        puts("Data Size: {}".format(self.data_size))
+        self.logger.info(f'Total Size: {self.total_size}')
+        self.logger.info(f'Data Offset: {self.data_offset}')
+        self.logger.info(f'Data Size: {self.data_size}')
 
         self.content_id: str = f.read(0x24).decode('utf-8')
-        puts("Content ID: {}".format(self.content_id))
+        self.logger.info(f'Content ID: {self.content_id}')
 
         self.padding: bytes = f.read(0x0C)
 
@@ -55,11 +54,11 @@ class PkgHeader(MagicFileHeader):
         self.header_cmac_hash: bytes = f.read(0x10)
         self.header_npdrm_signature: bytes = f.read(0x28)
         self.header_sha1_hash: bytes = f.read(0x08)
-        puts("Digest: {}".format(hexlify(self.digest)))
-        puts("PKG Data Riv: {}".format(self.pkg_data_riv))
-        puts("Header CMAC Hash: {}".format(hexlify(self.header_cmac_hash)))
-        puts("Header NPDRM Signature: {}".format(hexlify(self.header_npdrm_signature)))
-        puts("Header SHA1 Hash: {}".format(hexlify(self.header_sha1_hash)))
+        self.logger.info(f'Digest: {hexlify(self.digest)}')
+        self.logger.info(f'PKG Data Riv: {self.pkg_data_riv}')
+        self.logger.info(f'Header CMAC Hash: {hexlify(self.header_cmac_hash)}')
+        self.logger.info(f'Header NPDRM Signature: {hexlify(self.header_npdrm_signature)}')
+        self.logger.info(f'Header SHA1 Hash: {hexlify(self.header_sha1_hash)}')
 
     @property
     def magic(self) -> bytes:

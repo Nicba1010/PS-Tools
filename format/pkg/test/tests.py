@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from format._fix_pkg import PKG
+from format.pkg import PKG
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(message)s')
 

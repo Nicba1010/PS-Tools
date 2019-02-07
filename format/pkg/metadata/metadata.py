@@ -2,28 +2,29 @@ import struct
 from binascii import hexlify
 from typing import IO, List
 
-from clint.textui import puts
-
-from format._fix_pkg.content_type import ContentType
-from format._fix_pkg.drm_type import DrmType
-from format._fix_pkg.errors import InvalidPKGException, InvalidPKGMetadataSizeException, InvalidPKGMetadataException
+from base import LoggingClass
+from format.pkg.content_type import ContentType
+from format.pkg.drm_type import DrmType
+from format.pkg.errors import InvalidPKGException, InvalidPKGMetadataSizeException, InvalidPKGMetadataException
 from utils.utils import read_u32, Endianess
 
 
-class PkgMetadata(object):
+class PkgMetadata(LoggingClass):
     id: int = NotImplementedError
     category_name: str = NotImplementedError
     possible_sizes: List[int] = NotImplementedError
     possible_values: List[bytes] = NotImplementedError
 
     def __init__(self, f: IO):
+        super().__init__()
+
         self.id = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.data_size = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.data = f.read(self.data_size)
-        puts("Type: {}".format(self.category_name))
-        puts("Identifier: {}".format(self.id))
-        puts("Data Size: {}".format(self.data_size))
-        puts("Data: {}".format(hexlify(self.data)))
+        self.logger.debug(f'Identifier: {self.id}')
+        self.logger.info(f'Type: {self.category_name}')
+        self.logger.debug(f'Data Size: {self.data_size}')
+        self.logger.info(f'Data: {hexlify(self.data)}')
 
         if len(self.possible_sizes) != 0 and self.data_size not in self.__class__.possible_sizes:
             raise InvalidPKGMetadataSizeException(self.data_size, self.possible_sizes)
@@ -50,7 +51,7 @@ class DrmTypeMetadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         self.drm_type: DrmType = DrmType(struct.unpack('>I', self.data)[0])
-        puts("Drm Type: {}".format(self.drm_type))
+        self.logger.info(f'Drm Type: {self.drm_type}')
 
 
 class ContentTypeMetadata(PkgMetadata):
@@ -65,7 +66,7 @@ class ContentTypeMetadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         self.content_type: ContentType = ContentType(struct.unpack('>I', self.data)[0])
-        puts("Content Type: {}".format(self.content_type))
+        self.logger.info(f'Content Type: {self.content_type}')
 
     @property
     def install_path(self) -> str:
@@ -92,7 +93,7 @@ class PackageSizeMetadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         self.package_size: int = struct.unpack('>Q', self.data)[0]
-        puts("Package Size: {}".format(self.package_size))
+        self.logger.info(f'Package Size: {self.package_size}')
 
 
 class PkgMetaDataMetadata(PkgMetadata):
@@ -108,8 +109,8 @@ class PkgMetaDataMetadata(PkgMetadata):
             hexlify(self.data[2:3]).decode("utf-8"),
             hexlify(self.data[3:4]).decode("utf-8")
         )
-        puts("Make Package NPDRM Revision: {}".format(self.make_package_npdrm_rev))
-        puts("Package Version: {}".format(self.package_version))
+        self.logger.info(f'Make Package NPDRM Revision: {self.make_package_npdrm_rev}')
+        self.logger.info(f'Package Version: {self.package_version}')
 
 
 class TitleIdMetadata(PkgMetadata):
@@ -121,7 +122,7 @@ class TitleIdMetadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         self.title_id = str(self.data)
-        puts("Title ID: {}".format(self.title_id))
+        self.logger.info(f'Title ID: {self.title_id}')
 
 
 class QADigestMetadata(PkgMetadata):
@@ -133,7 +134,7 @@ class QADigestMetadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         self.qa_digest = self.data
-        puts("QA Digest: {}".format(hexlify(self.qa_digest)))
+        self.logger.info(f'QA Digest: {hexlify(self.qa_digest)}')
 
 
 class VersionMetadata(PkgMetadata):
@@ -160,9 +161,9 @@ class VersionMetadata(PkgMetadata):
             hexlify(self.data[4:5]).decode("utf-8"),
             hexlify(self.data[5:6]).decode("utf-8")
         )
-        puts("System Version: {}".format(self.system_version))
-        puts("Package Version: {}".format(self.package_version))
-        puts("App Version: {}".format(self.app_version))
+        self.logger.info(f'System Version: {self.system_version}')
+        self.logger.info(f'Package Version: {self.package_version}')
+        self.logger.info(f'App Version: {self.app_version}')
 
 
 class UnknownMetadata(PkgMetadata):
@@ -183,7 +184,7 @@ class UnknownMetadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         # TODO: Investigate what this is
-        puts("Unknown: {}".format(hexlify(self.data)))
+        self.logger.info(f'Unknown: {hexlify(self.data)}')
 
 
 class InstallDirectoryMetadata(PkgMetadata):
@@ -195,7 +196,7 @@ class InstallDirectoryMetadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         self.install_directory: str = self.data.decode('utf-8')
-        puts("Install Directory: {}".format(self.install_directory))
+        self.logger.info(f'Install Directory: {self.install_directory}')
 
 
 class Unknown2Metadata(PkgMetadata):
@@ -207,7 +208,7 @@ class Unknown2Metadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         # TODO: Investigate what this is
-        puts("Unknown (seen in PSP cumulative patch): {}".format(hexlify(self.data)))
+        self.logger.info(f'Unknown (seen in PSP cumulative patch): {hexlify(self.data)}')
 
 
 class Unknown3Metadata(PkgMetadata):
@@ -219,7 +220,7 @@ class Unknown3Metadata(PkgMetadata):
     def __init__(self, f: IO):
         super().__init__(f)
         # TODO: Investigate what this is
-        puts("Unknown: {}".format(hexlify(self.data)))
+        self.logger.info(f'Unknown: {hexlify(self.data)}')
 
 
 class IndexTableMetadata(PkgMetadata):

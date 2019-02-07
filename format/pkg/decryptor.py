@@ -1,5 +1,7 @@
 from typing import IO, AnyStr, List
 
+from cryptography.hazmat.primitives.ciphers import CipherContext
+
 from utils.utils import xor_lib
 from .header import PkgHeader
 
@@ -9,8 +11,8 @@ class DecryptorIO(IO):
     SEEK_DATA_OFFSET: int = 4
 
     def __init__(self, header: PkgHeader, f: IO):
-        self.encryptor = header.encryptor
         self.header: PkgHeader = header
+        self.encryptor: CipherContext = self.header.encryptor
         self.f: IO = f
 
     def __enter__(self) -> 'DecryptorIO':
