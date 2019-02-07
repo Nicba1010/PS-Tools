@@ -4,6 +4,7 @@ import os
 import struct
 from ctypes import cdll
 from logging import getLoggerClass, addLevelName, setLoggerClass, NOTSET
+from sys import platform
 from typing import IO
 
 DEFAULT_LOCAL_IO_BLOCK_SIZE = 8 * 1024 * 1024
@@ -17,12 +18,20 @@ psp_aes_key: bytes = bytes(
 
 max_int64 = 0xFFFFFFFFFFFFFFFF
 
-xor_lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), './xor.lib')
-xor_c_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), './xor.c')
-# if not os.path.exists(xor_lib_path):
-# TODO: Fix
-# subprocess.check_output(['gcc', xor_c_path, '-shared', '-std=c99', '-O3'])
+lib_name: str = None
 
+if platform == "linux" or platform == "linux2":
+    lib_name = 'nix'
+elif platform == "darwin":
+    lib_name = 'mac'
+elif platform == "win32":
+    lib_name = 'win'
+
+xor_lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), f'./xor.{lib_name}.lib')
+xor_lib = cdll.LoadLibrary(xor_lib_path)
+xor_lib.generate_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
+xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
+xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 
 VERBOSE = 5
 
@@ -39,12 +48,6 @@ class Logger(getLoggerClass()):
 
 
 setLoggerClass(Logger)
-
-if os.name == 'nt':
-    xor_lib = cdll.LoadLibrary(xor_lib_path)
-    xor_lib.generate_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
-    xor_lib.add.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
-    xor_lib.xor.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong]
 
 
 def human_size(size_: int, format_: str = '3.2'):
