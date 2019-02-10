@@ -1,9 +1,11 @@
 import os
+from binascii import hexlify
 from typing import IO
 
 from base import LoggingClass
 from format.pkg.decryptor import DecryptorIO
-from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, read_u32, read_u64, Endianess
+from format.pkg.utils import name_codec_map
+from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, read_u32, read_u64, Endianess, decode_data_with_all_codecs, sha1
 from .type import EntryType
 
 
@@ -32,16 +34,26 @@ class PKGEntry(LoggingClass):
 
         self.flag_psp: bool = (entry_flags >> 3 & 0x10) > 0
         self.logger.debug(f"PSP: {self.flag_psp}")
-
-        self.type: EntryType = EntryType(entry_flags & 0xFF)
-        self.logger.info(f"Type: {self.type}")
-
+        try:
+            self.type: EntryType = EntryType(entry_flags & 0xFF)
+            self.logger.info(f"Type: {self.type}")
+        except:
+            pass
         self.pad: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.logger.debug(f"Pad: {self.pad}")
 
         f.seek(self.name_offset, DecryptorIO.SEEK_DATA_OFFSET)
-        # Not decoded to ASCII or UTF8 because some packages even though they are valid, have invalid characters
-        self.name: str = f.read(self.name_size).decode('UTF-8')
+        # TODO: ugh encoding
+        name_data: bytes = f.read(self.name_size)
+        try:
+            self.name: str = name_data.decode('UTF-8')
+        except UnicodeDecodeError as e:
+            try:
+                self.name = name_data.decode(name_codec_map[sha1(name_data)])
+            except KeyError:
+                for codec, string in decode_data_with_all_codecs(name_data):
+                    print(f'{codec:15}({name_data}) ({hexlify(sha1(name_data)).decode("ASCII").upper()}) -> {string}')
+                raise e
         self.logger.info(f"Name: {self.name}")
 
     @property
