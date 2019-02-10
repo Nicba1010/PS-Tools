@@ -2,6 +2,7 @@ aenum
 beautifulsoup4
 click
 cryptography
+pyinstaller
 requests
 sqlalchemy
 urllib3
