@@ -27,9 +27,9 @@ if platform == "linux" or platform == "linux2":
 elif platform == "darwin":
     lib_name = 'mac'
 elif platform == "win32":
-    lib_name = 'win'
+    lib_name = 'mac'
 
-xor_lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), f'./xor.{lib_name}.lib')
+xor_lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), f'xor.{lib_name}.lib')
 xor_lib = cdll.LoadLibrary(xor_lib_path)
 xor_lib.generate_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
 xor_lib.generate_debug_xor_key.argtypes = [ctypes.c_char_p, ctypes.c_longlong, ctypes.c_longlong, ctypes.c_char_p]
