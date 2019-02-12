@@ -12,12 +12,17 @@ from .errors import InvalidPKGHeaderHashException, InvalidPKGHashException
 from .header import PkgHeader
 from .metadata import PkgMetadata
 from .revision import PkgRevision
+from .type import PkgType
 
 
 class PKG(FileFormatWithMagic[PkgHeader]):
 
     def __init__(self, path: str, verify_pkg_hash: bool = True):
         super().__init__(path, PkgHeader)
+
+        #: TODO: Issues with PSVITA
+        if self.header.type == PkgType.PSP_PSVITA:
+            return
 
         sha1 = hashlib.sha1()
         self.file_handle.seek(0x00)

@@ -9,10 +9,12 @@ class EntryType(MultiValueEnum):
     UNKNOWN_FILE = 0x06, 0x0E, 0x10, 0x11, 0x13, 0x15, 0x16
     UNKNOWN_FOLDER = 0x12
     SDAT = 0x09
+    UNKNOWN_FILE_SEEMS_PKG = 0x19
 
     @property
     def is_file(self):
-        if self in [EntryType.NPDRM, EntryType.NPDRM_EDAT, EntryType.REGULAR, EntryType.UNKNOWN_FILE, EntryType.SDAT]:
+        if self in [EntryType.NPDRM, EntryType.NPDRM_EDAT, EntryType.REGULAR, EntryType.UNKNOWN_FILE, EntryType.SDAT,
+                    EntryType.UNKNOWN_FILE_SEEMS_PKG]:
             return True
         elif self in [EntryType.FOLDER, EntryType.UNKNOWN_FOLDER]:
             return False

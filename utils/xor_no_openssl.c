@@ -1,4 +1,4 @@
-#include "openssl/sha.h"
+#include "sha1.c"
 #include <stdio.h>
 #include <string.h>
 typedef unsigned char byte;
