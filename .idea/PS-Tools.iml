@@ -10,7 +10,7 @@
       <excludeFolder url="file://$MODULE_DIR$/venv-32" />
       <excludeFolder url="file://$MODULE_DIR$/venv-pypy" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.7 (PSN)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.7 (PS-Tools)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
