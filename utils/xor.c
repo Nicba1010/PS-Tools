@@ -1,4 +1,4 @@
-#include "openssl/sha.h"
+#include "sha1.h"
 #include <stdio.h>
 #include <string.h>
 typedef unsigned char byte;
@@ -72,7 +72,7 @@ generate_debug_xor_key(byte *qa_digest, long long size, long long offset, byte *
     {
         byte hash[20];
 
-        SHA1(array, 64, hash);
+        sha1(array, 64, hash);
 
         memcpy(result+i, hash, 16);
 
