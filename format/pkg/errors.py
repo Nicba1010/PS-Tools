@@ -17,11 +17,6 @@ class InvalidPKGHeaderHashException(InvalidPKGException):
         super(InvalidPKGHeaderHashException, self).__init__("PKG header SHA1 hash doesn't match declared SHA1 hash.")
 
 
-class InvalidPKGHashException(InvalidPKGException):
-    def __init__(self):
-        super(InvalidPKGHashException, self).__init__("PKG SHA1 hash doesn't match declared SHA1 hash.")
-
-
 class InvalidPKGMetadataException(InvalidPKGException):
     def __init__(self, data: bytes, valid_sizes: List[bytes]):
         super(InvalidPKGMetadataException, self).__init__("Invalid Metadata Data! Is {} should be {}!".format(

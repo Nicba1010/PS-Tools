@@ -57,7 +57,7 @@ def retard_dl(url: str, to: str):
 
 
 def load_nps(file: str):
-    with open(file, 'r') as f:
+    with open(file, 'r', encoding='UTF-8') as f:
         line_n = 0
         for line in f:
             if line_n == 0:
@@ -68,7 +68,7 @@ def load_nps(file: str):
 
 
 def load_psndl(file: str):
-    with open(file, 'r') as f:
+    with open(file, 'r', encoding='UTF-8') as f:
         for line in f:
             entries.append(Entry.from_psndl_line(line))
             print(entries[-1])
@@ -94,6 +94,17 @@ def deduplicate():
         entries.append(entry)
         print(entry)
 
+def filter_downloaded():
+    new_entries: List[Entry] = []
+    for entry in entries:
+        if not os.path.exists(f'H:\\PSNDL\\{os.path.basename(entry.link)}'):
+            new_entries.append(entry)
+
+    entries.clear()
+
+    for entry in new_entries:
+        entries.append(entry)
+        print(entry)
 
 total = 0
 a = False
@@ -120,26 +131,9 @@ if __name__ == '__main__':
     deduplicate()
     print(len(entries))
 
-    # with ThreadPoolExecutor(max_workers=32) as executor:
-    #     futures = {
-    #         executor.submit(get_size, entry.link): entry for entry in entries
-    #     }
-    #     for future in concurrent.futures.as_completed(futures):
-    #         entry = futures[future]
-    #         try:
-    #             size = future.result()
-    #         except Exception as e:
-    #             raise e
-    #         else:
-    #             total += size
-    #             print(f'{entry.content_id} -> {human_size(size)}')
-    #             print(f'Total -> {human_size(total)}')
-    for i, entry in enumerate(entries):
-        if i < 7955:
-            continue
-        size = get_size(entry.link)
-        total += size
-        print(f'{i} -> {entry.content_id} -> {human_size(size)}')
-        print(human_size(total))
+    filter_downloaded()
+    print(len(entries))
 
-    print(human_size(total))
+    with open('./temp/out.txt', 'w') as f:
+        for entry in entries:
+            f.write(f'{entry.link}\n')

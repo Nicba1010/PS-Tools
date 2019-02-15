@@ -32,7 +32,7 @@ class PKGParsingTest(unittest.TestCase):
                         tuple(list([f'0{x}.pkg' for x in range(10)]))):
                         continue
                     t = False
-                    pkg: PKG = PKG(file, verify_pkg_hash=False)
+                    pkg: PKG = PKG(file)
                     if pkg.header.revision == PkgRevision.DEBUG:
                         print(pkg.path)
                         return
@@ -48,6 +48,6 @@ class PKGParsingTest(unittest.TestCase):
                         continue
                     t = False
                     try:
-                        pkg: PKG = PKG(file, verify_pkg_hash=False)
+                        pkg: PKG = PKG(file)
                     except EmptyFileException:
                         logging.error(f'{file} is 0 bytes, something is wrong.')

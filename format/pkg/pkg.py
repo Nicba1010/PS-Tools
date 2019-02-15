@@ -8,7 +8,7 @@ from .content_type import ContentType
 from .decryptor import DecryptorIO
 from .drm_type import DrmType
 from .entry import PKGEntry
-from .errors import InvalidPKGHeaderHashException, InvalidPKGHashException
+from .errors import InvalidPKGHeaderHashException
 from .header import PkgHeader
 from .metadata import PkgMetadata
 from .revision import PkgRevision
@@ -17,8 +17,8 @@ from .type import PkgType
 
 class PKG(FileFormatWithMagic[PkgHeader]):
 
-    def __init__(self, path: str, verify_pkg_hash: bool = True):
-        super().__init__(path, PkgHeader)
+    def __init__(self, path: str, verify: bool = True):
+        super().__init__(path, PkgHeader, verify)
 
         #: TODO: Issues with PSVITA
         if self.header.type == PkgType.PSP_PSVITA:
@@ -33,12 +33,6 @@ class PKG(FileFormatWithMagic[PkgHeader]):
             raise InvalidPKGHeaderHashException()
         else:
             self.logger.info('Header SHA1 Hash Verified!')
-
-        if verify_pkg_hash:
-            if not self.verify():
-                raise InvalidPKGHashException()
-            else:
-                self.logger.info('PKG SHA1 Hash Verified!')
 
         self.drm_type: DrmType = None
         self.content_type: ContentType = None
@@ -64,7 +58,7 @@ class PKG(FileFormatWithMagic[PkgHeader]):
                 self.file_handle.seek(self.header.data_offset + PKGEntry.size() * item_index)
                 self.files.append(PKGEntry(fd))
 
-    def verify(self) -> bool:
+    def verify_hash(self) -> bool:
         with open(self.path, 'rb') as f:
             size_without_pkg_hash = os.stat(self.path).st_size - 32
             f.seek(size_without_pkg_hash)
