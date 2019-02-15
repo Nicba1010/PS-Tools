@@ -43,9 +43,10 @@ class DecryptorIO(IO):
         # IMPORTANT: This increments pkg_data_riv by 1
         if self.header.revision == PkgRevision.RETAIL:
             xor_lib.generate_xor_key(self.header.pkg_data_riv, xor_key_size, block_offset, xor_key)
+            return self.encryptor.update(bytes(xor_key))
         else:
-            xor_lib.generate_debug_xor_key(self.header.pkg_data_riv, xor_key_size, block_offset, xor_key)
-        return self.encryptor.update(bytes(xor_key))
+            xor_lib.generate_debug_xor_key(self.header.digest, xor_key_size, block_offset, xor_key)
+            return bytes(xor_key)
 
     def readable(self) -> bool:
         return True

@@ -74,7 +74,7 @@ generate_debug_xor_key(byte *qa_digest, long long size, long long offset, byte *
 
         sha1(array, 64, hash);
 
-        memcpy(result+i, hash, 16);
+        memcpy(result + i, hash, 16);
 
         for(int j = 63, k = 1;
             (j >= 0) && k;
