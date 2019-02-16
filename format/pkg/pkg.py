@@ -1,28 +1,28 @@
 import hashlib
 import os
-from typing import List
+from typing import List, Optional
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes, CipherContext
 
 from base.file_format import FileFormatWithMagic
-from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE
+from format.pkg.metadata import ContentTypeMetadata
+from format.pkg.type import PkgType
+from utils.keys import PS3_GPKG_KEY, PSP_GPKG_KEY, PSP2_GPKG_KEY0, PSP2_GPKG_KEY1, PSP2_GPKG_KEY2
+from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, backend
 from .content_type import ContentType
-from .decryptor import DecryptorIO
+from .decryptor import PkgInternalIO
 from .drm_type import DrmType
 from .entry import PKGEntry
 from .errors import InvalidPKGHeaderHashException
 from .header import PkgHeader
 from .metadata import PkgMetadata
 from .revision import PkgRevision
-from .type import PkgType
 
 
 class PKG(FileFormatWithMagic[PkgHeader]):
 
     def __init__(self, path: str, verify: bool = True):
         super().__init__(path, PkgHeader, verify)
-
-        #: TODO: Issues with PSVITA
-        if self.header.type == PkgType.PSP_PSVITA:
-            return
 
         sha1 = hashlib.sha1()
         self.file_handle.seek(0x00)
@@ -52,11 +52,33 @@ class PKG(FileFormatWithMagic[PkgHeader]):
 
         self.file_handle.seek(self.header.data_offset)
         self.files: List[PKGEntry] = []
-        with DecryptorIO(self.header, self.file_handle) as fd:
+        with PkgInternalIO(self.file_handle, self.header, self.internal_fs_key) as fd:
             for item_index in range(0, self.header.item_count):
                 self.logger.info(f'Processing file #{item_index}:')
                 self.file_handle.seek(self.header.data_offset + PKGEntry.size() * item_index)
                 self.files.append(PKGEntry(fd))
+
+    @property
+    def internal_fs_key(self) -> bytes:
+        if self.header.type == PkgType.PS3:
+            return PS3_GPKG_KEY
+        else:
+            for metadata in self.metadata:
+                if isinstance(metadata, ContentTypeMetadata):
+                    encryption_key: Optional[bytes] = None
+
+                    if metadata.content_type == ContentType.PSP2GD:
+                        encryption_key = PSP2_GPKG_KEY0
+                    elif metadata.content_type == ContentType.PSP2AC:
+                        encryption_key = PSP2_GPKG_KEY1
+                    elif metadata.content_type == ContentType.PSP2LA:
+                        encryption_key = PSP2_GPKG_KEY2
+
+                    if encryption_key is not None:
+                        cipher: Cipher = Cipher(algorithms.AES(encryption_key), modes.ECB(), backend=backend)
+                        encryptor: CipherContext = cipher.encryptor()
+                        return encryptor.update(self.header.pkg_data_riv)
+            return PSP_GPKG_KEY
 
     def verify_hash(self) -> bool:
         with open(self.path, 'rb') as f:

@@ -3,7 +3,7 @@ from binascii import hexlify
 from typing import IO
 
 from base import LoggingClass
-from format.pkg.decryptor import DecryptorIO
+from format.pkg.decryptor import PkgInternalIO
 from format.pkg.utils import name_codec_map
 from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, read_u32, read_u64, Endianess, decode_data_with_all_codecs, sha1
 from .type import EntryType
@@ -11,7 +11,7 @@ from .type import EntryType
 
 class PKGEntry(LoggingClass):
 
-    def __init__(self, f: DecryptorIO):
+    def __init__(self, f: PkgInternalIO):
         super().__init__()
         self.f: IO = f
 
@@ -34,15 +34,14 @@ class PKGEntry(LoggingClass):
 
         self.flag_psp: bool = (entry_flags >> 3 & 0x10) > 0
         self.logger.debug(f"PSP: {self.flag_psp}")
-        try:
-            self.type: EntryType = EntryType(entry_flags & 0xFF)
-            self.logger.info(f"Type: {self.type}")
-        except:
-            pass
+
+        self.type: EntryType = EntryType(entry_flags & 0xFF)
+        self.logger.info(f"Type: {self.type}")
+
         self.pad: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.logger.debug(f"Pad: {self.pad}")
 
-        f.seek(self.name_offset, DecryptorIO.SEEK_DATA_OFFSET)
+        f.seek(self.name_offset, PkgInternalIO.SEEK_DATA_OFFSET)
         # TODO: ugh encoding
         name_data: bytes = f.read(self.name_size)
         try:
@@ -52,7 +51,9 @@ class PKGEntry(LoggingClass):
                 self.name = name_data.decode(name_codec_map[sha1(name_data)])
             except KeyError:
                 for codec, string in decode_data_with_all_codecs(name_data):
-                    print(f'{codec:15}({name_data}) ({hexlify(sha1(name_data)).decode("ASCII").upper()}) -> {string}')
+                    self.logger.debug(
+                        f'{codec:15}({name_data}) ({hexlify(sha1(name_data)).decode("ASCII").upper()}) -> {string}'
+                    )
                 raise e
         self.logger.info(f"Name: {self.name}")
 
@@ -85,7 +86,7 @@ class PKGEntry(LoggingClass):
             self.logger.info(f'Extracting file: {self.name} -> {path}')
             if not os.path.exists(path) or self.flag_overwrite:
                 with open(path, 'wb') as export:
-                    self.f.seek(self.file_offset, DecryptorIO.SEEK_DATA_OFFSET)
+                    self.f.seek(self.file_offset, PkgInternalIO.SEEK_DATA_OFFSET)
                     bytes_remaining: int = self.file_size
                     while bytes_remaining != 0:
                         to_read: int = block_size if bytes_remaining >= block_size else bytes_remaining

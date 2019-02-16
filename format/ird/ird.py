@@ -65,7 +65,7 @@ class IRD(FileFormatWithMagic[IRDHeader]):
             self.pic: bytes = self.file_handle.read(115)
             self.logger.debug(f"PIC: {hexlify(self.pic).decode('ASCII')}")
 
-        #: Used to derive the disc AES encryption key
+        #: Used to derive the disc AES encryption pkg_internal_fs_key
         self.data1: bytes = self.file_handle.read(16)
         #: TODO: Document this!
         self.data2: bytes = self.file_handle.read(16)

@@ -1,29 +1,41 @@
-from typing import IO, AnyStr, List
+from typing import IO, AnyStr, List, Optional
 
-from cryptography.hazmat.primitives.ciphers import CipherContext
+from cryptography.hazmat.primitives.ciphers import CipherContext, Cipher, algorithms, modes
 
-from utils.utils import xor_lib
+from base import LoggingClass
+from utils.utils import xor_lib, backend
 from .header import PkgHeader
 from .revision import PkgRevision
 
 
 # noinspection PyAbstractClass
-class DecryptorIO(IO):
+class PkgInternalIO(IO, LoggingClass):
     SEEK_DATA_OFFSET: int = 4
 
-    def __init__(self, header: PkgHeader, f: IO):
+    def __init__(self, f: IO, header: PkgHeader, encryption_key: Optional[bytes]):
+        super().__init__()
         self.header: PkgHeader = header
-        self.encryptor: CipherContext = self.header.encryptor
         self.f: IO = f
 
-    def __enter__(self) -> 'DecryptorIO':
+        self.encryption_key: Optional[bytes] = encryption_key
+        self.cipher: Optional[Cipher] = None
+        self.encryptor: Optional[CipherContext] = None
+
+        if self.header.revision == PkgRevision.RETAIL:
+            if encryption_key is None:
+                raise ValueError('Encryptor pkg_internal_fs_key was not supplied even though the PKG is a Retail PKG.')
+            self.cipher = Cipher(algorithms.AES(self.encryption_key), modes.ECB(), backend=backend)
+            self.encryptor = self.cipher.encryptor()
+            self.logger.info('Encryptor initialized...')
+
+    def __enter__(self) -> 'PkgInternalIO':
         return self
 
     def __exit__(self, ext_type, ext_val, ext_trace) -> None:
         pass
 
     def seek(self, offset: int, whence: int = 0) -> int:
-        if whence == DecryptorIO.SEEK_DATA_OFFSET:
+        if whence == PkgInternalIO.SEEK_DATA_OFFSET:
             return self.f.seek(offset + self.header.data_offset)
         else:
             return self.f.seek(offset, whence)

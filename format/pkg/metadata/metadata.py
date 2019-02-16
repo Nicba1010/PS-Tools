@@ -1,12 +1,17 @@
 import struct
 from binascii import hexlify
+from io import BytesIO
 from typing import IO, List
 
 from base import LoggingClass
 from format.pkg.content_type import ContentType
 from format.pkg.drm_type import DrmType
 from format.pkg.errors import InvalidPKGException, InvalidPKGMetadataSizeException, InvalidPKGMetadataException
-from utils.utils import read_u32, Endianess
+from format.pkg.metadata.entirety_info import EntiretyInfo
+from format.pkg.metadata.self_info import SELFInfo
+from format.pkg.metadata.unknown_data_info import UnknownDataInfo
+from format.pkg.sfo_info import SFOInfo
+from utils.utils import read_u32, Endianess, unpack_u32
 
 
 class PkgMetadata(LoggingClass):
@@ -21,9 +26,9 @@ class PkgMetadata(LoggingClass):
         self.id = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.data_size = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.data = f.read(self.data_size)
-        self.logger.debug(f'Identifier: {self.id}')
+        self.logger.debug(f'Identifier: {hex(self.id)}')
         self.logger.info(f'Type: {self.category_name}')
-        self.logger.debug(f'Data Size: {self.data_size}')
+        self.logger.debug(f'Data Size: {hex(self.data_size)}')
         self.logger.info(f'Data: {hexlify(self.data)}')
 
         if len(self.possible_sizes) != 0 and self.data_size not in self.__class__.possible_sizes:
@@ -39,6 +44,7 @@ class PkgMetadata(LoggingClass):
         for subclass in PkgMetadata.__subclasses__():
             if subclass.id == metadata_id:
                 return subclass(f)
+        print(metadata_id)
         raise InvalidPKGException
 
 
@@ -232,7 +238,14 @@ class IndexTableMetadata(PkgMetadata):
 
     def __init__(self, f: IO):
         super().__init__(f)
-        raise NotImplementedError
+        self.offset: int = unpack_u32(self.data[0x00:0x04], endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f'Offset: {self.offset}')
+
+        self.size: int = unpack_u32(self.data[0x04:0x08], endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f'Size: {self.size}')
+
+        self.sha_256_hash: bytes = self.data[0x08:0x28]
+        self.logger.info(f'SHA-256 Hash: {hexlify(self.sha_256_hash)}')
 
 
 class ParamSFOMetadata(PkgMetadata):
@@ -243,7 +256,7 @@ class ParamSFOMetadata(PkgMetadata):
 
     def __init__(self, f: IO):
         super().__init__(f)
-        raise NotImplementedError
+        self.sfo_info: SFOInfo = SFOInfo(BytesIO(self.data))
 
 
 class UnknownDataMetadata(PkgMetadata):
@@ -254,7 +267,7 @@ class UnknownDataMetadata(PkgMetadata):
 
     def __init__(self, f: IO):
         super().__init__(f)
-        raise NotImplementedError
+        self.unknown_data_info: UnknownDataInfo = UnknownDataInfo(BytesIO(self.data))
 
 
 class EntiretyMetadata(PkgMetadata):
@@ -265,7 +278,7 @@ class EntiretyMetadata(PkgMetadata):
 
     def __init__(self, f: IO):
         super().__init__(f)
-        raise NotImplementedError
+        self.entirety_info: EntiretyInfo = EntiretyInfo(BytesIO(self.data))
 
 
 class PublishingMetadata(PkgMetadata):
@@ -278,7 +291,15 @@ class PublishingMetadata(PkgMetadata):
 
     def __init__(self, f: IO):
         super().__init__(f)
-        raise NotImplementedError
+        self.publishing_tools_version: str = "{}.{}".format(
+            hexlify(self.data[0x00:0x01]).decode("utf-8"),
+            hexlify(self.data[0x01:0x04]).decode("utf-8")
+        )
+        self.logger.info(f'Publishing Tools Version: {self.publishing_tools_version}')
+
+        # TODO: Determine how to actually decode this
+        self.psf_builder_version: str = hexlify(self.data[0x00:0x04]).decode("utf-8")
+        self.logger.info(f'PSF Builder Version: {self.psf_builder_version}')
 
 
 class SelfMetadata(PkgMetadata):
@@ -289,4 +310,4 @@ class SelfMetadata(PkgMetadata):
 
     def __init__(self, f: IO):
         super().__init__(f)
-        raise NotImplementedError
+        self.self_info: SELFInfo = SELFInfo(BytesIO(self.data))

@@ -1,15 +1,51 @@
 from binascii import hexlify
 from typing import IO
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import algorithms, Cipher, modes
-
 from base.header import MagicFileHeader
-from utils.utils import ps3_aes_key, psp_aes_key, read_u32, read_u64, Endianess
+from base.utils import constant_check
+from utils.utils import read_u32, read_u64, Endianess
+from .key_id import PkgKeyID
 from .revision import PkgRevision
 from .type import PkgType
 
-backend = default_backend()
+
+class PkgExtHeader(MagicFileHeader):
+    def __init__(self, f: IO):
+        super().__init__(f)
+
+        self.unknown_1: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        constant_check(self.logger, 'Unknown 1', self.unknown_1, 1)
+
+        self.header_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f'Header Size: {self.header_size}')
+
+        self.data_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f'Data Size: {self.data_size}')
+
+        self.main_and_ext_headers_hmac_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f'Main and Ext Headers HMAC Offset: {self.main_and_ext_headers_hmac_offset}')
+
+        self.metadata_header_hmac_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f'Metadata Header HMAC Offset: {self.metadata_header_hmac_offset}')
+
+        self.tail_offset: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f'Tail Offset: {self.tail_offset}')
+
+        self.padding_1: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        constant_check(self.logger, 'Padding 1', self.padding_1, 0)
+
+        self.pkg_key_id: PkgKeyID = PkgKeyID(read_u32(f, endianess=Endianess.BIG_ENDIAN))
+        self.logger.info(f'PKG Key ID: {self.pkg_key_id}')
+
+        self.full_header_hmac_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
+        self.logger.info(f'Full Header HMAC Offset: {self.full_header_hmac_offset}')
+
+        self.padding_2: bytes = f.read(0x14)
+        constant_check(self.logger, 'Padding 2', self.padding_2, bytes([0x00] * 0x14))
+
+    @property
+    def magic(self) -> bytes:
+        return b'\x7fext'
 
 
 class PkgHeader(MagicFileHeader):
@@ -20,12 +56,6 @@ class PkgHeader(MagicFileHeader):
         self.type: PkgType = PkgType(f.read(2))
         self.logger.info(f'PKG Revision: {self.revision}')
         self.logger.info(f'PKG Type: {self.type}')
-
-        self.cipher = Cipher(algorithms.AES(
-            ps3_aes_key if self.type == PkgType.PS3 else psp_aes_key
-        ), modes.ECB(), backend=backend)
-        self.encryptor = self.cipher.encryptor()
-        self.logger.info("Encryptor initialized...")
 
         self.metadata_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
         self.metadata_count: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
@@ -59,6 +89,9 @@ class PkgHeader(MagicFileHeader):
         self.logger.info(f'Header CMAC Hash: {hexlify(self.header_cmac_hash)}')
         self.logger.info(f'Header NPDRM Signature: {hexlify(self.header_npdrm_signature)}')
         self.logger.info(f'Header SHA1 Hash: {hexlify(self.header_sha1_hash)}')
+
+        if self.type == PkgType.PSP_PSVITA:
+            self.ext_header: PkgExtHeader = PkgExtHeader(f)
 
     @property
     def magic(self) -> bytes:

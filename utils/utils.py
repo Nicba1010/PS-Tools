@@ -7,7 +7,11 @@ from logging import setLoggerClass
 from sys import platform
 from typing import IO, List, Generator, Tuple
 
+from cryptography.hazmat.backends import default_backend
+
 from .logger import Logger
+
+backend = default_backend()
 
 DEFAULT_LOCAL_IO_BLOCK_SIZE = 8 * 1024 * 1024
 

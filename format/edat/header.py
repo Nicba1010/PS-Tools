@@ -47,7 +47,7 @@ class EDATHeader(MagicFileHeader):
         #: NPD Hash 1
         """
          CID-FN hash (an AES CMAC hash of concatenation of Content
-         ID and File Name using the third NPDRM OMAC key as CMAC key)
+         ID and File Name using the third NPDRM OMAC pkg_internal_fs_key as CMAC pkg_internal_fs_key)
         """
         # TODO: Do hashcheck
         self.npd_hash_1: bytearray = f.read(0x10)
@@ -57,7 +57,7 @@ class EDATHeader(MagicFileHeader):
         """
          header hash (an AES CMAC hash of the 0x60 bytes from the 
          beginning of file using xored bytes of the developer's 
-         klicensee and the second NPDRM OMAC key as CMAC key)
+         klicensee and the second NPDRM OMAC pkg_internal_fs_key as CMAC pkg_internal_fs_key)
         """
         # TODO: Do hashcheck
         self.npd_hash_2: bytearray = f.read(0x10)
@@ -103,7 +103,7 @@ class EDATHeader(MagicFileHeader):
         #: Extended Header Hash
         """
          An AES CMAC hash of 160 bytes from the beginning of file) 
-         uses the hash key as CMAC key and it depends on the file 
+         uses the hash pkg_internal_fs_key as CMAC pkg_internal_fs_key and it depends on the file 
          flags and keys
         """
         # TODO: Do hashcheck
@@ -113,7 +113,7 @@ class EDATHeader(MagicFileHeader):
         #: ECDSA Metadata Signature
         """
          Can be zeroed on forged file. curve_type is vsh type 0x02, 
-         pub is vsh public key,
+         pub is vsh public pkg_internal_fs_key,
         """
         # TODO: Do hashcheck
         self.ecdsa_metadata_signature: bytearray = f.read(0x28)
@@ -123,7 +123,7 @@ class EDATHeader(MagicFileHeader):
         """
          Enabled (only?) for PS2 classic: all custom firmwares are 
          patched to skip the ECDSA check. Can be zeroed on forged file. 
-         curve_type is vsh type 0x02, pub is vsh public key.
+         curve_type is vsh type 0x02, pub is vsh public pkg_internal_fs_key.
         """
         # TODO: Do hashcheck
         self.ecdsa_header_signature: bytearray = f.read(0x28)

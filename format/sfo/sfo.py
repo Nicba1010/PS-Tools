@@ -29,7 +29,7 @@ class SFO(FileFormatWithMagic[SFOHeader]):
             #: Index Table Entry Index
             index: int = self.index_table.index(entry)
 
-            #: Seek to entry key offset
+            #: Seek to entry pkg_internal_fs_key offset
             self.file_handle.seek(self.header.key_table_offset + entry.key_offset)
 
             #: Read Key Name (Always UTF-8, NULL Terminated, [A-Z])
@@ -148,7 +148,7 @@ class SFO(FileFormatWithMagic[SFOHeader]):
                 #: SFO Key Data Pair
                 key, data = list(self.key_data_map.items())[index]
 
-                #: Seek to entry key offset
+                #: Seek to entry pkg_internal_fs_key offset
                 f.seek(self.header.key_table_offset + entry.key_offset)
 
                 #: Write Key
