@@ -25,10 +25,10 @@ class EntiretyInfo(LoggingClass):
         constant_check(self.logger, "Unknown 1", self.unk_1, 0x00)
 
         self.unk_2: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        constant_check(self.logger, "Unknown 2", self.unk_2, [0x00, 0x01])
+        self.logger.info(f'Unknown 2: {self.unk_2}')
 
         self.unk_3: bytes = f.read(0x8)
-        self.logger.info(f'Unknown: {hexlify(self.unk_3)}')
+        self.logger.info(f'Unknown 3: {hexlify(self.unk_3)}')
 
         self.sha_256_hash: bytes = f.read(0x20)
         self.logger.info(f'SHA-256 Hash: {hexlify(self.sha_256_hash)}')

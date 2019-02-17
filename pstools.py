@@ -79,7 +79,8 @@ def edit(file: str, out_file: str):
     sfo_file: SFO = SFO(file)
     while True:
         #: Adding NULL Terminator because the keys contain the NULL Terminator in the file already
-        key: str = input('Enter pkg_internal_fs_key of the entry you would like to edit (q -> quit, w -> write and quit): ') + '\0'
+        key: str = input('Enter pkg_internal_fs_key of the entry you would like to edit (q -> quit, w -> write and '
+                         'quit): ') + '\0'
         if key == 'q\0':
             return
         elif key == 'w\0':

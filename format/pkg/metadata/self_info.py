@@ -3,7 +3,7 @@ from typing import IO
 
 from base import LoggingClass
 from base.utils import constant_check
-from utils.utils import read_u32, Endianess, read_u16
+from utils.utils import read_u32, Endianess
 
 
 class SELFInfo(LoggingClass):

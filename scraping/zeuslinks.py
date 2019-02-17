@@ -94,6 +94,7 @@ def deduplicate():
         entries.append(entry)
         print(entry)
 
+
 def filter_downloaded():
     new_entries: List[Entry] = []
     for entry in entries:
@@ -105,6 +106,7 @@ def filter_downloaded():
     for entry in new_entries:
         entries.append(entry)
         print(entry)
+
 
 total = 0
 a = False
