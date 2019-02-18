@@ -2,50 +2,10 @@ from binascii import hexlify
 from typing import IO
 
 from base.header import MagicFileHeader
-from base.utils import constant_check
+from format.pkg.revision import PkgRevision
+from format.pkg.type import PkgType
 from utils.utils import read_u32, read_u64, Endianess
-from .key_id import PkgKeyID
-from .revision import PkgRevision
-from .type import PkgType
-
-
-class PkgExtHeader(MagicFileHeader):
-    def __init__(self, f: IO):
-        super().__init__(f)
-
-        self.unknown_1: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        constant_check(self.logger, 'Unknown 1', self.unknown_1, 1)
-
-        self.header_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        self.logger.info(f'Header Size: {self.header_size}')
-
-        self.data_size: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        self.logger.info(f'Data Size: {self.data_size}')
-
-        self.main_and_ext_headers_hmac_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        self.logger.info(f'Main and Ext Headers HMAC Offset: {self.main_and_ext_headers_hmac_offset}')
-
-        self.metadata_header_hmac_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        self.logger.info(f'Metadata Header HMAC Offset: {self.metadata_header_hmac_offset}')
-
-        self.tail_offset: int = read_u64(f, endianess=Endianess.BIG_ENDIAN)
-        self.logger.info(f'Tail Offset: {self.tail_offset}')
-
-        self.padding_1: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        constant_check(self.logger, 'Padding 1', self.padding_1, 0)
-
-        self.pkg_key_id: PkgKeyID = PkgKeyID(read_u32(f, endianess=Endianess.BIG_ENDIAN))
-        self.logger.info(f'PKG Key ID: {self.pkg_key_id}')
-
-        self.full_header_hmac_offset: int = read_u32(f, endianess=Endianess.BIG_ENDIAN)
-        self.logger.info(f'Full Header HMAC Offset: {self.full_header_hmac_offset}')
-
-        self.padding_2: bytes = f.read(0x14)
-        constant_check(self.logger, 'Padding 2', self.padding_2, bytes([0x00] * 0x14))
-
-    @property
-    def magic(self) -> bytes:
-        return b'\x7fext'
+from .ext_header import PkgExtHeader
 
 
 class PkgHeader(MagicFileHeader):
