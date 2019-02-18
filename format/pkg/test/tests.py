@@ -5,7 +5,7 @@ import unittest
 from base.errors import EmptyFileException
 from format.pkg import PKG
 
-logging.basicConfig(level=logging.ERROR, format='%(name)-32s: %(levelname)-8s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(name)-32s: %(levelname)-8s %(message)s')
 
 
 # noinspection PyMethodMayBeStatic,PyUnusedLocal

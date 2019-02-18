@@ -66,7 +66,8 @@ class PkgInternalIO(IO, LoggingClass):
             return encryptor.update(bytes(xor_key))
         else:
             #: Generate the debug xor key (no encryption needed)
-            return bytes(xor_lib.generate_debug_xor_key(self.header.digest, xor_key_size, block_offset, xor_key))
+            xor_lib.generate_debug_xor_key(self.header.digest, xor_key_size, block_offset, xor_key)
+            return bytes(xor_key)
 
     def read(self, n: int = -1, alternate_encryption_key: Optional[bytes] = None) -> AnyStr:
         #: Copy offset to a variable so that we don't call tell() twice

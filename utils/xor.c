@@ -7,7 +7,7 @@ typedef unsigned char byte;
 static inline void
 add_byte(byte *array, long long size, byte k)
 {
-    for(int i = size-1;
+    for(int i = size - 1;
         (i >= 0) && k;
         --i)
     {
@@ -23,8 +23,8 @@ add(byte *array, long long size, long long k)
         i >= 0;
         --i)
     {
-        byte v = k>>(8*i);
-        add_byte(array, size-i, v);
+        byte v = k >> (8 * i);
+        add_byte(array, size - i, v);
     }
 }
 
@@ -57,7 +57,6 @@ generate_xor_key(byte *pkg_data_riv, long long size, long long offset, byte *res
 extern void
 generate_debug_xor_key(byte *qa_digest, long long size, long long offset, byte *result)
 {
-    // TODO: SHA1 stuff, this doesnt work yet
     byte array[64];
     memcpy(array, qa_digest, 8);
     memcpy(array + 8, qa_digest, 8);
