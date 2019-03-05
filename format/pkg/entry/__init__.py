@@ -1,2 +1,2 @@
-from .entry import PKGEntry
+from .entry import PkgEntry
 from .type import EntryType

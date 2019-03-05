@@ -8,6 +8,7 @@ from sys import platform
 from typing import IO, List, Generator, Tuple
 
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, hmac
 
 from .logger import Logger
 
@@ -51,6 +52,12 @@ def sha1(data: bytes) -> bytes:
     hasher = hashlib.sha1()
     hasher.update(data)
     return hasher.digest()
+
+
+def hmac_sha256(key: bytes, data: bytes) -> bytes:
+    h = hmac.HMAC(key, hashes.SHA256(), backend=backend)
+    h.update(data)
+    return h.finalize()
 
 
 def decode_data_with_all_codecs(data: bytes) -> Generator[Tuple[str, str], None, None]:

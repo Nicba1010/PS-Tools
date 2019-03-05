@@ -11,8 +11,7 @@ from utils.keys import PS3_GPKG_KEY, PSP_GPKG_KEY, PSP2_GPKG_KEY0, PSP2_GPKG_KEY
 from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, backend
 from .content_type import ContentType
 from .decryptor import PkgInternalIO
-from .drm_type import DrmType
-from .entry import PKGEntry
+from .entry import PkgEntry
 from .errors import InvalidPKGHeaderHashException
 from .header import PkgHeader
 from .metadata import PkgMetadata
@@ -34,15 +33,6 @@ class PKG(FileFormatWithMagic[PkgHeader]):
         else:
             self.logger.info('Header SHA1 Hash Verified!')
 
-        self.drm_type: DrmType = None
-        self.content_type: ContentType = None
-        self.system_version: str = None
-        self.app_version: str = None
-        self.package_version: str = None
-        self.make_package_npdrm_rev: int = None
-        self.title_id: str = None
-        self.qa_digest: bytes = None
-
         self.metadata: List[PkgMetadata] = []
         self.file_handle.seek(self.header.metadata_offset)
 
@@ -51,12 +41,12 @@ class PKG(FileFormatWithMagic[PkgHeader]):
             self.metadata.append(PkgMetadata.create(self.file_handle))
 
         self.file_handle.seek(self.header.data_offset)
-        self.files: List[PKGEntry] = []
-        with PkgInternalIO(self.file_handle, self.header, self.internal_fs_key) as fd:
+        self.files: List[PkgEntry] = []
+        with PkgInternalIO(self.file_handle, self.header, self.internal_fs_key) as f:
             for item_index in range(0, self.header.item_count):
                 self.logger.info(f'Processing file #{item_index}:')
-                self.file_handle.seek(self.header.data_offset + PKGEntry.size() * item_index)
-                self.files.append(PKGEntry(fd))
+                self.file_handle.seek(self.header.data_offset + PkgEntry.size() * item_index)
+                self.files.append(PkgEntry.read_from_file(f))
 
     @property
     def internal_fs_key(self) -> bytes:
@@ -97,3 +87,8 @@ class PKG(FileFormatWithMagic[PkgHeader]):
                 to_read -= len(data)
 
             return pkg_hash == sha1.digest()
+
+    def export(self, entry: PkgEntry, path: str, block_size: int = DEFAULT_LOCAL_IO_BLOCK_SIZE,
+               use_package_path: bool = False, create_directories: bool = True) -> bool:
+        with PkgInternalIO(self.file_handle, self.header, self.internal_fs_key) as f:
+            return entry.export(f, path, block_size, use_package_path, create_directories)

@@ -49,7 +49,7 @@ def extract(file: str, verify: bool):
     pkg_file: PKG = PKG(file, verify)
     for entry in pkg_file.files:
         # TODO: Fix to use title_id but need to fix metadata for that
-        entry.save_file(f'{pkg_file.header.content_id}/', use_package_path=True)
+        pkg_file.export(entry, f'{pkg_file.header.content_id}/', use_package_path=True)
 
 
 @pstools.group()

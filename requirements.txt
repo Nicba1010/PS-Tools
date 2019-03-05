@@ -1,3 +1,4 @@
+PyYAML
 aenum
 beautifulsoup4
 click

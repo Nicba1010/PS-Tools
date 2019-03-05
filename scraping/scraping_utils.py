@@ -1,8 +1,38 @@
+import concurrent
 import os
 import re
-from typing import Dict
+from concurrent.futures.thread import ThreadPoolExecutor
+from typing import Dict, List, Generator, Union, Tuple
 
+import requests
+import urllib3
 from requests import Session, Response
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+def simple_get(url: str) -> Response:
+    response: Response = requests.get(url, verify=False)
+    return response
+
+
+def multithread_get(urls: List[str], workers: int = 8) -> Generator[Union[Tuple[str, Response], None], None, None]:
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        print("Creating futures")
+        futures = {
+            executor.submit(simple_get, url): url for url in urls
+        }
+        print('Done creating futures')
+        for future in concurrent.futures.as_completed(futures):
+            url: str = futures[future]
+            try:
+                response: Response = future.result()
+            except Exception as e:
+                raise e
+            else:
+                if response is None:
+                    yield None
+                yield (url, response)
 
 
 def download_file(url: str, session: Session = Session(), path: str = './', file_name: str = None):
