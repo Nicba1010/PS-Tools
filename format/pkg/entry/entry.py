@@ -5,7 +5,7 @@ from binascii import hexlify
 
 from base import LoggingClass
 from base.utils import constant_check
-from format.pkg.utils import name_codec_map
+from ..utils import name_codec_map
 from utils.keys import PS3_GPKG_KEY, PSP_GPKG_KEY
 from utils.utils import DEFAULT_LOCAL_IO_BLOCK_SIZE, read_u32, read_u64, Endianess, decode_data_with_all_codecs, sha1
 from .type import EntryType
