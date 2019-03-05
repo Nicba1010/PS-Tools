@@ -20,8 +20,6 @@ class PKGParsingTest(unittest.TestCase):
                     file = os.path.join(root, file)
                     print(file)
                     pkg: PKG = PKG(file)
-                    with open('test.yaml', 'w') as f:
-                        yaml.dump(pkg.files, f)
                     del pkg
 
     def test_pkg_library(self):
